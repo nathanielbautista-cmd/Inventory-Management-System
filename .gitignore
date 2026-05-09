@@ -1,17 +1,17 @@
 # dependencies
 node_modules/
-frontend/node_modules/
-backend/node_modules/
+Frontend/node_modules/
+Backend/node_modules/
 
 # builds
 build/
 dist/
-frontend/build/
+Frontend/build/
 
 # environment files
 .env
 *.env
-backend/.env
+Backend/.env
 .env.local
 .env.development.local
 .env.test.local
