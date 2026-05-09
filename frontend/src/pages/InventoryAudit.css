@@ -64,6 +64,15 @@
   margin-top: 20px;
 }
 
+.audit-feedback-error {
+  margin: 0;
+  padding: 14px 18px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-weight: 600;
+  border-bottom: 1px solid #fecaca;
+}
+
 .audit-table {
   width: 100%;
   border-collapse: collapse;
@@ -179,6 +188,11 @@
 
 .audit-sync-btn:hover {
   background: #374151;
+}
+
+.audit-sync-btn:disabled {
+  background: #94a3b8;
+  cursor: wait;
 }
 
 .voice-mic-btn {

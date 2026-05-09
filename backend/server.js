@@ -16,6 +16,9 @@ app.use("/api/users", userRoutes);
 const inventoryRoutes = require("./routes/inventory");
 app.use("/api/inventory", inventoryRoutes);
 
+const inventoryAuditRoutes = require("./routes/inventoryAuditRoutes");
+app.use("/api/inventory-audits", inventoryAuditRoutes);
+
 const salesRoutes = require("./routes/sales");
 app.use("/api/sales", salesRoutes);
 

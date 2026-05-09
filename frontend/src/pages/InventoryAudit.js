@@ -3,29 +3,49 @@ import axios from "axios";
 import { FaMicrophone, FaSpinner } from "react-icons/fa";
 import "./InventoryAudit.css";
 
+const API_BASE_URL = "http://localhost:5000/api";
+
 function InventoryAudit() {
   const [products, setProducts] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
   const [countInputs, setCountInputs] = useState({});
   const [activeVoiceProductId, setActiveVoiceProductId] = useState(null);
+  const [savingProductId, setSavingProductId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const recognitionRef = useRef(null);
 
   const token = localStorage.getItem("token");
+  const authHeaders = useCallback(
+    () => ({
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    [token]
+  );
 
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(`${API_BASE_URL}/products`, authHeaders());
       setProducts(res.data);
     } catch (err) {
       console.error(err);
+      setErrorMessage("Failed to load products.");
     }
-  }, [token]);
+  }, [authHeaders]);
+
+  const fetchAuditLogs = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/inventory-audits`, authHeaders());
+      setAuditLogs(res.data);
+    } catch (err) {
+      console.error(err);
+      setErrorMessage("Failed to load inventory audit records.");
+    }
+  }, [authHeaders]);
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchAuditLogs();
+  }, [fetchProducts, fetchAuditLogs]);
 
   const speak = (text) => {
     window.speechSynthesis.cancel();
@@ -102,29 +122,42 @@ function InventoryAudit() {
     }
   };
 
-  const handleRecordAudit = (productId, physicalCount) => {
-    if (physicalCount === "" || physicalCount < 0) return;
+  const handleRecordAudit = async (productId, physicalCount) => {
+    if (physicalCount === "" || Number(physicalCount) < 0) return;
 
     const product = products.find((item) => item._id === productId);
-    const count = parseInt(physicalCount, 10);
-    const variance = count - product.stock;
+    if (!product) return;
 
-    const newLog = {
-      name: product.name,
-      system: product.stock,
-      physical: count,
-      variance,
-      time: new Date().toLocaleTimeString(),
-    };
+    try {
+      setSavingProductId(productId);
+      setErrorMessage("");
 
-    setAuditLogs((currentLogs) => [newLog, ...currentLogs]);
+      const res = await axios.post(
+        `${API_BASE_URL}/inventory-audits`,
+        {
+          productId,
+          physicalCount: parseInt(physicalCount, 10),
+        },
+        authHeaders()
+      );
 
-    const feedbackText =
-      variance === 0
-        ? `Recorded ${product.name}. Stock is perfect.`
-        : `Recorded ${product.name}. Variance is ${variance}.`;
-    speak(feedbackText);
-    setCountInputs((current) => ({ ...current, [productId]: "" }));
+      setAuditLogs((currentLogs) => [res.data, ...currentLogs]);
+
+      const feedbackText =
+        res.data.variance === 0
+          ? `Recorded ${product.name}. Stock is perfect.`
+          : `Recorded ${product.name}. Variance is ${res.data.variance}.`;
+      speak(feedbackText);
+      setCountInputs((current) => ({ ...current, [productId]: "" }));
+    } catch (err) {
+      console.error(err);
+      setErrorMessage(
+        err.response?.data?.message || "Failed to save inventory audit record."
+      );
+      speak(`Failed to record audit for ${product.name}.`);
+    } finally {
+      setSavingProductId(null);
+    }
   };
 
   const startVoiceCommand = (productId, productName) => {
@@ -219,6 +252,7 @@ function InventoryAudit() {
       </header>
 
       <div className="audit-table-container">
+        {errorMessage ? <p className="audit-feedback-error">{errorMessage}</p> : null}
         <table className="audit-table">
           <thead>
             <tr>
@@ -328,11 +362,12 @@ function InventoryAudit() {
                       <button
                         className="audit-sync-btn"
                         type="button"
+                        disabled={savingProductId === product._id}
                         onClick={() => {
                           handleRecordAudit(product._id, countInputs[product._id] ?? "");
                         }}
                       >
-                        Record
+                        {savingProductId === product._id ? "Saving..." : "Record"}
                       </button>
                     </div>
                   </td>
@@ -357,11 +392,11 @@ function InventoryAudit() {
           </thead>
           <tbody>
             {auditLogs.map((log, index) => (
-              <tr key={index}>
-                <td>{log.time}</td>
-                <td>{log.name}</td>
-                <td>{log.system}</td>
-                <td>{log.physical}</td>
+              <tr key={log._id || index}>
+                <td>{new Date(log.createdAt).toLocaleString()}</td>
+                <td>{log.productName}</td>
+                <td>{log.systemStock}</td>
+                <td>{log.physicalCount}</td>
                 <td
                   className={
                     log.variance < 0
