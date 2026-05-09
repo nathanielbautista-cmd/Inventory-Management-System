@@ -1,0 +1,480 @@
+
+
+
+/* Login.css */
+/* Uses Montserrat for Headings (800 weight), Open Sans for Body */
+:root {
+  --primary-deep: #2563eb; /* Cobalt Blue */
+  --primary-glow: #60a5fa;
+  --bg-form: #fcfcfd;
+  --bg-modal: #ffffff;
+  --text-primary: #0f172a; /* Near Black */
+  --text-secondary: #475569; /* Slate Gray */
+  --text-muted: #94a3b8;
+  --error: #ef4444;
+  --accent-line: #fb923c; /* Orange */
+}
+
+
+.imp-auth-page {
+  font-family: 'Open Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  background-color: #0c101d; /* Deep Dark Background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+
+.imp-auth-container {
+  display: flex;
+  width: 100%;
+  max-width: 1100px;
+  height: auto;
+  min-height: 600px;
+  background-color: var(--bg-form);
+  border-radius: 24px;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.4);
+  overflow: hidden; /* Clips children to the rounded corners */
+}
+
+
+.imp-brand-panel {
+  flex: 1.2;
+  position: relative;
+  background-color: #121827; /* Near black for contrast */
+  color: white;
+  padding: 60px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.imp-brand-content {
+  position: relative;
+  z-index: 5; /* Puts content above animated gradients */
+}
+
+.imp-logo-space {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.imp-accent-line {
+  width: 50px;
+  height: 4px;
+  background-color: var(--accent-line);
+  margin-bottom: 30px;
+  border-radius: 2px;
+}
+
+.imp-brand-content h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 3rem;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.imp-brand-content p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 400px;
+}
+
+
+.imp-gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  z-index: 1;
+  animation: orbMovement 15s infinite alternate ease-in-out;
+}
+
+
+@keyframes orbMovement {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.05); }
+  100% { transform: translate(-10px, 30px) scale(0.95); }
+}
+
+
+.imp-form-panel {
+  flex: 1;
+  padding: 60px;
+  background-color: var(--bg-form);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imp-form-content {
+  width: 100%;
+  max-width: 360px;
+}
+
+.imp-form-header {
+  margin-bottom: 40px;
+}
+
+.imp-form-header h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: -1px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.imp-form-header p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+
+.imp-input-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+/* Enhanced Inputs with Floating Labels */
+.imp-input-group input {
+  width: 100%;
+  padding: 1.5rem 1rem 0.6rem 2.8rem; /* Tall padding for the label */
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  font-family: 'Open Sans', sans-serif;
+}
+
+
+.imp-input-group label {
+  position: absolute;
+  top: 1rem;
+  left: 2.8rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+  pointer-events: none; /* Allows click-through to input */
+  transition: all 0.2s ease;
+}
+
+
+.imp-input-group input:focus + label,
+.imp-input-group input:valid + label {
+  top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-deep);
+}
+
+
+.imp-input-group input:focus {
+  outline: none;
+  border-color: var(--primary-glow);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.imp-input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #cbd5e1;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.imp-input-group input:focus ~ .imp-input-icon {
+  color: var(--primary-deep);
+}
+
+
+.imp-password-group input {
+  padding-right: 4.5rem; /* Space for the SHOW/HIDE button */
+}
+
+.imp-password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  padding: 8px;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.imp-password-toggle:hover {
+  background-color: #e2e8f0;
+  color: var(--text-primary);
+}
+
+
+.imp-form-options {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+  margin-bottom: 24px;
+}
+
+.imp-form-options.split {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.imp-forgot-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-deep);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.imp-forgot-link:hover {
+  opacity: 0.8;
+}
+
+
+.imp-login-btn {
+  width: 100%;
+  padding: 1.1rem;
+  background-color: var(--primary-deep);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.imp-login-btn:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px);
+}
+
+.imp-login-btn:active {
+  transform: translateY(0);
+}
+
+.imp-btn-icon {
+  font-size: 0.8rem;
+  margin-left: 10px;
+  transition: transform 0.2s ease;
+}
+
+.imp-login-btn:hover .imp-btn-icon {
+  transform: translateX(4px);
+}
+
+
+.imp-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+.imp-error-banner {
+  background-color: #fef2f2;
+  color: var(--error);
+  border: 1px solid #fecaca;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.imp-feedback-banner {
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.imp-feedback-banner.error {
+  background-color: #fef2f2;
+  color: var(--error);
+  border: 1px solid #fecaca;
+}
+
+.imp-feedback-banner.success {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+
+.imp-footer-text {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+
+.imp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.8); /* Dark Slate Overlay */
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.imp-modal-content {
+  background-color: var(--bg-modal);
+  padding: 50px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 440px;
+  position: relative;
+  box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.3);
+  animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.imp-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.2s;
+}
+
+.imp-modal-close:hover {
+  background: #e2e8f0;
+  color: var(--text-primary);
+}
+
+.imp-modal-icon {
+  font-size: 2rem;
+  color: var(--primary-deep);
+  margin-bottom: 15px;
+}
+
+.imp-modal-header h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.imp-modal-header p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 30px;
+}
+
+.imp-modal-input {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-bottom: 24px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.imp-modal-input:focus {
+  outline: none;
+  border-color: var(--primary-deep);
+}
+
+.imp-btn-confirm {
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--primary-deep);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.imp-btn-confirm:hover {
+  background-color: #1d4ed8;
+}
+
+.imp-modal-actions.stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.imp-btn-secondary-modal {
+  width: 100%;
+  padding: 1rem;
+  background: #eff6ff;
+  color: var(--primary-deep);
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+@media (max-width: 900px) {
+  .imp-auth-page { padding: 20px; }
+  .imp-auth-container { flex-direction: column; max-width: 500px; }
+  .imp-brand-panel { padding: 40px; text-align: center; }
+  .imp-brand-content { display: flex; flex-direction: column; align-items: center; }
+  .imp-accent-line { margin: 0 auto 30px; }
+  .imp-brand-content h1 { font-size: 2.2rem; }
+  .imp-brand-content p { font-size: 1rem; }
+  .imp-form-panel { padding: 40px; }
+}
