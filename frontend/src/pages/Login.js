@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaUser, FaLock, FaEnvelope, FaChevronRight, FaTimes } from "react-icons/fa";
 import "./Login.css";
+
+const API_BASE_URL = "http://localhost:5000/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -25,6 +27,20 @@ function Login() {
   const [verifyEmailLocked, setVerifyEmailLocked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [adminSetupAvailable, setAdminSetupAvailable] = useState(false);
+
+  useEffect(() => {
+    const checkAdminSetupStatus = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/auth/admin-setup-status`);
+        setAdminSetupAvailable(Boolean(res.data.requiresSetup));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    checkAdminSetupStatus();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -41,7 +57,7 @@ function Login() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(`${API_BASE_URL}/auth/login`, {
         email,
         password,
       });
@@ -112,7 +128,7 @@ function Login() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", {
+      const res = await axios.post(`${API_BASE_URL}/auth/forgot-password`, {
         email: resetEmail,
       });
       setResetOtpSent(true);
@@ -126,7 +142,7 @@ function Login() {
 
   const handleResetPassword = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/reset-password", {
+      const res = await axios.post(`${API_BASE_URL}/auth/reset-password`, {
         email: resetEmail,
         otpCode: resetOtpCode,
         newPassword,
@@ -150,7 +166,7 @@ function Login() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/resend-verification-otp", {
+      const res = await axios.post(`${API_BASE_URL}/auth/resend-verification-otp`, {
         email: verifyEmail,
       });
       setVerifyOtpSent(true);
@@ -164,7 +180,7 @@ function Login() {
 
   const handleVerifyEmail = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/verify-email", {
+      const res = await axios.post(`${API_BASE_URL}/auth/verify-email`, {
         email: verifyEmail,
         otpCode: verifyOtpCode,
       });
@@ -237,7 +253,6 @@ function Login() {
                 <span className="imp-forgot-link" onClick={() => setShowForgotModal(true)}>
                   Forgot Password?
                 </span>
-
               </div>
 
               <button type="submit" className={`imp-login-btn ${loading ? "loading" : ""}`} disabled={loading}>
@@ -249,6 +264,15 @@ function Login() {
                   </>
                 )}
               </button>
+
+              {adminSetupAvailable ? (
+                <div className="imp-admin-setup-cta">
+                  <span>Need to create the first admin account?</span>
+                  <Link to="/setup-admin" className="imp-inline-link">
+                    Sign up as admin
+                  </Link>
+                </div>
+              ) : null}
             </form>
 
             <div className="imp-footer-text"></div>

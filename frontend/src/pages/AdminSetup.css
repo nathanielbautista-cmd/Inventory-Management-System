@@ -1,0 +1,30 @@
+@import "./Login.css";
+
+.admin-setup-page .imp-form-content {
+  max-width: 380px;
+}
+
+.admin-setup-note {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.admin-setup-link {
+  display: inline-flex;
+  margin-top: 18px;
+  color: var(--primary-deep);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-setup-link:hover {
+  opacity: 0.8;
+}
+
+.admin-setup-closed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

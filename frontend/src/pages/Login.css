@@ -349,6 +349,26 @@
   color: var(--text-muted);
 }
 
+.imp-inline-link {
+  color: var(--primary-deep);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.imp-inline-link:hover {
+  opacity: 0.8;
+}
+
+.imp-admin-setup-cta {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
 
 .imp-modal-overlay {
   position: fixed;

@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
+import AdminSetup from "./pages/AdminSetup";
 import AdminDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import POS from "./pages/POS";
@@ -12,6 +13,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/setup-admin" element={<AdminSetup />} />
         <Route path="/signup" element={<Navigate to="/" replace />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/staff" element={<Navigate to="/" replace />} />
