@@ -290,7 +290,6 @@ function POS() {
         ReactDOM.createPortal(
           <div className="receipt-overlay">
             <div className="receipt-modal">
-              <div className="check-icon">OK</div>
               <h2>Transaction Successful</h2>
               <p>Paid via {lastTransaction?.method}</p>
               <div className="receipt-details">
