@@ -4,11 +4,13 @@ import Dashboard from "./Dashboard";
 import ManageUsers from "./ManageUsers";
 import ManageProducts from "./ManageProducts";
 import Inventory from "./Inventory";
+import InventoryRecords from "./InventoryRecords";
 import Sales from "./Sales";
 import ProfileModal from "../components/ProfileModal";
 
 function AdminDashboard() {
   const [activePage, setActivePage] = useState("dashboard");
+  const [showInventoryMenu, setShowInventoryMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userProfile, setUserProfile] = useState({
     name: localStorage.getItem("userName") || "Administrator",
@@ -16,6 +18,11 @@ function AdminDashboard() {
     avatar: localStorage.getItem("userAvatar") || "",
   });
   const userInitial = userProfile.name.trim().charAt(0).toUpperCase() || "A";
+
+  const handleInventoryMenuClick = () => {
+    setShowInventoryMenu((current) => !current);
+    setActivePage("inventory");
+  };
 
   const renderContent = () => {
     switch (activePage) {
@@ -25,6 +32,8 @@ function AdminDashboard() {
         return <ManageProducts />;
       case "inventory":
         return <Inventory />;
+      case "inventory-records":
+        return <InventoryRecords />;
       case "sales":
         return <Sales />;
       case "users":
@@ -36,7 +45,6 @@ function AdminDashboard() {
 
   return (
     <div className="dashboard">
-      {/* ===== SIDEBAR ===== */}
       <div className="sidebar">
         <div>
           <button
@@ -65,28 +73,35 @@ function AdminDashboard() {
             >
               📊 Dashboard
             </li>
-
             <li
               className={activePage === "users" ? "active" : ""}
               onClick={() => setActivePage("users")}
             >
               👥 Manage Users
             </li>
-
             <li
               className={activePage === "products" ? "active" : ""}
               onClick={() => setActivePage("products")}
             >
               🏷️ Manage Products
             </li>
-
             <li
-              className={activePage === "inventory" ? "active" : ""}
-              onClick={() => setActivePage("inventory")}
+              className={`sidebar-parent-item ${
+                activePage === "inventory" || activePage === "inventory-records" ? "active" : ""
+              }`}
+              onClick={handleInventoryMenuClick}
             >
-              📦 View Inventory
+              <span>📦 View Inventory</span>
+              <span className={`sidebar-caret ${showInventoryMenu ? "open" : ""}`}>▾</span>
             </li>
-
+            {showInventoryMenu ? (
+              <li
+                className={`sidebar-sub-item ${activePage === "inventory-records" ? "active" : ""}`}
+                onClick={() => setActivePage("inventory-records")}
+              >
+                📋 Record List
+              </li>
+            ) : null}
             <li
               className={activePage === "sales" ? "active" : ""}
               onClick={() => setActivePage("sales")}
@@ -107,9 +122,7 @@ function AdminDashboard() {
         </button>
       </div>
 
-      {/* ===== MAIN AREA ===== */}
       <div className="main">
-        {/* Page Content */}
         <div className="page-content">{renderContent()}</div>
       </div>
 

@@ -134,6 +134,26 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
+.sidebar-parent-item {
+  justify-content: space-between;
+}
+
+.sidebar-caret {
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-caret.open {
+  transform: rotate(180deg);
+}
+
+.sidebar-sub-item {
+  margin-left: 1rem;
+  padding-left: 1.25rem;
+  font-size: 0.95rem;
+  border-left: 2px solid rgba(148, 163, 184, 0.25);
+}
+
 
 .logout-btnn{
   background: rgba(239, 68, 68, 0.1);

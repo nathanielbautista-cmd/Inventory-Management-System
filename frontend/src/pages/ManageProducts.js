@@ -209,7 +209,6 @@ function ManageProducts() {
       <div className="manage-header">
         <div className="title-section">
           <h1>Product Management</h1>
-          <p>Create, update, and organize your inventory items.</p>
         </div>
         <button className="add-btn" onClick={() => setShowModal(true)}>
           <FaPlus /> Add Product

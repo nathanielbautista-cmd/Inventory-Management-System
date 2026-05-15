@@ -16,6 +16,15 @@ const saleItemSchema = new mongoose.Schema(
 );
 
 const SaleSchema = new mongoose.Schema({
+  soldBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  },
+  soldByName: {
+    type: String,
+    default: "Unknown Staff"
+  },
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product"

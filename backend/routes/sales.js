@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Sale = require("../models/Sale");
 const Product = require("../models/Product");
+const User = require("../models/User");
 const auth = require("../middleware/auth");
 
 function canCreateSales(role) {
@@ -58,8 +59,11 @@ router.post("/create", auth, async (req, res) => {
       await product.save();
     }
 
+    const user = await User.findById(req.user.id).select("name");
     const primaryItem = saleItems[0];
     const newSale = new Sale({
+      soldBy: req.user.id || null,
+      soldByName: user?.name || "Unknown Staff",
       productId: primaryItem.productId,
       productName: primaryItem.productName,
       quantity: saleItems.reduce((sum, item) => sum + item.quantity, 0),
@@ -83,7 +87,9 @@ router.get("/", auth, async (req, res) => {
       return res.status(403).json("Only admin or cashier can view sales");
     }
 
-    const sales = await Sale.find().sort({ date: -1 });
+    const sales = await Sale.find()
+      .populate("soldBy", "name email role")
+      .sort({ date: -1 });
     res.json(sales);
   } catch (err) {
     res.status(500).json(err);

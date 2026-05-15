@@ -100,9 +100,30 @@
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08);
 }
 
+.audit-records-section {
+  margin-top: 32px;
+}
+
+.audit-records-header {
+  margin-bottom: 14px;
+}
+
+.audit-records-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  color: #0f172a;
+}
+
+.audit-records-header p {
+  margin: 0;
+  color: #64748b;
+}
+
 .inv-table { width: 100%; border-collapse: collapse; text-align: left; }
 .inv-table th { padding: 18px 24px; background: #f8fafc; color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; }
 .inv-table td { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+
+.font-bold { font-weight: 700; }
 
 .cat-badge { background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #475569; }
 
@@ -118,3 +139,139 @@
 .status-pill.verified { background: #dcfce7; color: #15803d; }
 .status-pill.warning { background: #fef3c7; color: #92400e; }
 .status-pill.danger { background: #fee2e2; color: #b91c1c; }
+
+.empty-state-cell {
+  text-align: center;
+  color: #64748b;
+}
+
+.records-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.clickable-row:hover {
+  background: #f8fafc;
+}
+
+.staff-name-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #1d4ed8;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.staff-name-button:hover {
+  text-decoration: underline;
+}
+
+.record-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.record-modal {
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  padding: 28px;
+}
+
+.record-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.record-modal-header h2 {
+  margin: 0 0 4px;
+  color: #0f172a;
+}
+
+.record-modal-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.record-modal-close {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  cursor: pointer;
+}
+
+.record-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.record-detail-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+  background: #f8fafc;
+}
+
+.record-detail-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.record-detail-card strong {
+  display: block;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.staff-records-table-wrap {
+  margin-top: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .inv-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .record-modal {
+    padding: 20px;
+  }
+}

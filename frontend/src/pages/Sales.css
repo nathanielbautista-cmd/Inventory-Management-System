@@ -148,115 +148,16 @@
   font-weight: 600;
 }
 
-.sale-status-tag {
-  background: #ebf8ff;
-  color: #2b6cb0;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.sales-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(6px);
+.sales-loader {
+  background-color: #f4f7fa;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3000;
-  padding: 20px;
+  font-weight: 700;
+  color: #2d3748;
 }
 
-.sales-modal {
-  width: 100%;
-  max-width: 640px;
-  background: white;
-  border-radius: 20px;
-  padding: 28px;
-  position: relative;
-  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.18);
-}
-
-.sales-modal-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: #f1f5f9;
-  color: #475569;
-  cursor: pointer;
-}
-
-.sales-modal-header h3 {
-  margin: 0;
-  font-size: 1.4rem;
-  color: #1a202c;
-}
-
-.sales-modal-header p {
-  margin: 8px 0 0;
-  color: #718096;
-}
-
-.sales-modal-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin: 24px 0;
-}
-
-.sales-modal-summary div {
-  background: #f8fafc;
-  border-radius: 14px;
-  padding: 14px;
-}
-
-.sales-modal-summary span {
-  display: block;
-  font-size: 0.78rem;
-  color: #718096;
-  margin-bottom: 6px;
-}
-
-.sales-modal-summary strong {
-  color: #1a202c;
-}
-
-.sales-modal-items {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sales-modal-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
-  padding: 14px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #fcfdff;
-}
-
-.sales-modal-item p {
-  margin: 4px 0 0;
-  color: #718096;
-  font-size: 0.82rem;
-}
-
-.sales-modal-item-values {
-  text-align: right;
-}
-
-.sales-modal-item-values span {
-  display: block;
-  color: #718096;
-  font-size: 0.82rem;
-  margin-bottom: 4px;
+.sales-info-card {
+  margin-top: 10px;
 }

@@ -6,6 +6,7 @@ const Product = require("../models/Product");
 router.get("/", auth, async (req, res) => {
   try {
     const logs = await InventoryAudit.find()
+      .populate("auditedBy", "name email role")
       .sort({ createdAt: -1 })
       .limit(200);
 
@@ -47,7 +48,12 @@ router.post("/", auth, async (req, res) => {
       auditedBy: req.user.id || null,
     });
 
-    res.status(201).json(auditLog);
+    const populatedAuditLog = await InventoryAudit.findById(auditLog._id).populate(
+      "auditedBy",
+      "name email role"
+    );
+
+    res.status(201).json(populatedAuditLog);
   } catch (error) {
     console.error("Create inventory audit error:", error);
     res.status(500).json({ message: "Failed to save inventory audit record" });

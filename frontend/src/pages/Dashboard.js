@@ -139,7 +139,6 @@ function Dashboard({ onViewAllSales }) {
       <header className="dashboard-header">
         <div>
           <h1>Dashboard</h1>
-          <p>Welcome back! Here's your Mini Mart overview.</p>
         </div>
         <div className="date-pill">{new Date().toDateString()}</div>
       </header>
@@ -162,7 +161,7 @@ function Dashboard({ onViewAllSales }) {
             <FaMoneyBillWave />
           </div>
           <div className="stat-info">
-            <h3>Total Sales</h3>
+            <h3>Total Revenue</h3>
             <p className="stat-value">PHP {stats.totalRevenue.toLocaleString()}</p>
           </div>
         </div>

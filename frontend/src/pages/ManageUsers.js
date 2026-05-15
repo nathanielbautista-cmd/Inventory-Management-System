@@ -114,7 +114,6 @@ function ManageUsers() {
         <div className="admin-header">
           <div>
             <h1>User Control Center</h1>
-            <p>Manage user accounts and permissions.</p>
           </div>
           <button className="imp-btn-primary" onClick={() => setShowAddModal(true)}>
             <FaUserPlus /> <span>Create User</span>

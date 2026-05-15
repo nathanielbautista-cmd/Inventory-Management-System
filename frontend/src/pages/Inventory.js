@@ -48,17 +48,17 @@ function Inventory() {
     }
   };
 
-  // --- Export Logic ---
+  
   const handleExport = () => {
     if (products.length === 0) {
       alert("No data available to export");
       return;
     }
 
-    // Define headers
+    
     const headers = ["Product Name", "Category", "Price", "Stock Level"];
 
-    // Map products to rows and handle commas in text by wrapping in quotes
+    
     const csvRows = products.map((p) => [
       `"${p.name}"`,
       `"${p.category}"`,
@@ -66,10 +66,10 @@ function Inventory() {
       p.stock
     ].join(","));
 
-    // Combine headers and data
+    
     const csvContent = [headers.join(","), ...csvRows].join("\n");
 
-    // Create download link
+    
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -81,7 +81,7 @@ function Inventory() {
     document.body.removeChild(link);
   };
 
-  // --- Analytics Calculations ---
+  
   const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
 
@@ -99,7 +99,7 @@ function Inventory() {
         <div className="inv-header">
           <div>
             <h1>Inventory</h1>
-            <p>Manage and monitor your product inventory</p>
+
           </div>
           <button className="export-btn" onClick={handleExport}>
             <FaFileDownload /> Export Report
