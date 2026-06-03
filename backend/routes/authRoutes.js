@@ -4,25 +4,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { sendOtpEmail, isEmailConfigured } = require("../utils/email");
 
-function getEmailErrorMessage(error) {
-  if (error?.code === "EAUTH") {
-    return "Email authentication failed. Check SMTP_USER and SMTP_PASS.";
-  }
-
-  if (error?.code === "ECONNECTION" || error?.code === "ETIMEDOUT") {
-    return "Could not connect to the email server. Check SMTP_HOST, SMTP_PORT, and SMTP_SECURE.";
-  }
-
-  if (error?.message?.includes("Missing SMTP")) {
-    return error.message;
-  }
-
-  const detail = error?.code || error?.responseCode || error?.command || error?.message;
-  return detail
-    ? `Failed to send verification OTP email. SMTP detail: ${detail}`
-    : "Failed to send verification OTP email.";
-}
-
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -202,7 +183,7 @@ router.post("/setup-admin", async (req, res) => {
     });
   } catch (error) {
     console.error("Admin setup error:", error);
-    res.status(500).json({ message: getEmailErrorMessage(error) });
+    res.status(500).json({ message: "Failed to create admin account" });
   }
 });
 
@@ -247,7 +228,7 @@ router.post("/setup-admin/resend-otp", async (req, res) => {
     res.json({ message: "Verification OTP sent to email" });
   } catch (error) {
     console.error("Resend admin setup OTP error:", error);
-    res.status(500).json({ message: getEmailErrorMessage(error) });
+    res.status(500).json({ message: "Failed to send verification OTP email" });
   }
 });
 
@@ -364,7 +345,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: getEmailErrorMessage(error) });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -404,7 +385,7 @@ router.post("/resend-verification-otp", async (req, res) => {
     res.json({ message: "Verification OTP sent to email" });
   } catch (error) {
     console.error("Resend verification OTP error:", error);
-    res.status(500).json({ message: getEmailErrorMessage(error) });
+    res.status(500).json({ message: "Failed to send verification OTP email" });
   }
 });
 
@@ -469,7 +450,7 @@ router.post("/forgot-password", async (req, res) => {
     res.json({ message: "Password reset OTP sent to email" });
   } catch (error) {
     console.error("Forgot password error:", error);
-    res.status(500).json({ message: getEmailErrorMessage(error) });
+    res.status(500).json({ message: "Failed to send password reset OTP email" });
   }
 });
 
