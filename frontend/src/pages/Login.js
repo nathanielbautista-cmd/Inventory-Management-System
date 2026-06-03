@@ -46,8 +46,9 @@ function Login() {
     setError("");
     setLoading(true);
 
+    const normalizedEmail = email.trim().toLowerCase();
     const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       setError("Please enter a valid email address.");
       setLoading(false);
       return;
@@ -57,7 +58,7 @@ function Login() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const res = await axios.post(`${API_BASE_URL}/auth/login`, {
-        email,
+        email: normalizedEmail,
         password,
       });
 
@@ -83,8 +84,10 @@ function Login() {
     } catch (err) {
       const data = err.response?.data;
 
-      if (data?.requiresVerification) {
-        setVerifyEmail(data.email || email);
+      if (!err.response) {
+        setError("Cannot connect to the online server. Please check the API URL/deployment.");
+      } else if (data?.requiresVerification) {
+        setVerifyEmail(data.email || normalizedEmail);
         setVerifyOtpCode("");
         setVerifyMessage(data.message);
         setVerifyOtpSent(true);

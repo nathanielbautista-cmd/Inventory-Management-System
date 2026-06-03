@@ -282,7 +282,8 @@ router.post("/setup-admin/verify", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
