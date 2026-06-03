@@ -199,7 +199,7 @@ router.post("/setup-admin/resend-otp", async (req, res) => {
       return res.status(400).json({ message: "There is no pending admin account to verify." });
     }
 
-    const email = typeof req.body.email === "string" ? req.body.email.toLowerCase() : "";
+    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const admin = await User.findOne({
       role: "admin",
       email,
@@ -227,7 +227,7 @@ router.post("/setup-admin/resend-otp", async (req, res) => {
 
     res.json({ message: "Verification OTP sent to email" });
   } catch (error) {
-    console.error("Resend admin setup OTP error:", error);
+    console.error("Resend admin setup OTP error:", error.message);
     res.status(500).json({ message: "Failed to send verification OTP email" });
   }
 });
@@ -356,7 +356,7 @@ router.post("/resend-verification-otp", async (req, res) => {
       return res.status(400).json({ message: "Email OTP is not configured on the server." });
     }
 
-    const { email } = req.body;
+    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -385,14 +385,15 @@ router.post("/resend-verification-otp", async (req, res) => {
 
     res.json({ message: "Verification OTP sent to email" });
   } catch (error) {
-    console.error("Resend verification OTP error:", error);
+    console.error("Resend verification OTP error:", error.message);
     res.status(500).json({ message: "Failed to send verification OTP email" });
   }
 });
 
 router.post("/verify-email", async (req, res) => {
   try {
-    const { email, otpCode } = req.body;
+    const { otpCode } = req.body;
+    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -425,7 +426,7 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(400).json({ message: "Forgot password OTP is not configured on the server." });
     }
 
-    const { email } = req.body;
+    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const user = await User.findOne({ email });
 
     if (!user) {
