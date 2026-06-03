@@ -25,34 +25,45 @@ function createTransporter() {
     SMTP_PASS,
     SMTP_SERVICE
   } = process.env;
+  const normalizedService = SMTP_SERVICE ? SMTP_SERVICE.trim().toLowerCase() : "";
+  const normalizedPass =
+    normalizedService === "gmail" && SMTP_PASS
+      ? SMTP_PASS.replace(/\s/g, "")
+      : SMTP_PASS;
 
-  if (SMTP_SERVICE) {
-    if (!SMTP_USER || !SMTP_PASS) {
+  if (SMTP_HOST && SMTP_PORT) {
+    if (!SMTP_USER || !normalizedPass) {
       throw new Error("Missing SMTP_USER or SMTP_PASS");
     }
 
     return nodemailer.createTransport({
-      service: SMTP_SERVICE,
+      host: SMTP_HOST,
+      port: Number(SMTP_PORT),
+      secure: SMTP_SECURE === "true",
       auth: {
         user: SMTP_USER,
-        pass: SMTP_PASS
+        pass: normalizedPass
       }
     });
   }
 
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    throw new Error("Missing SMTP configuration");
+  if (SMTP_SERVICE) {
+    if (!SMTP_USER || !normalizedPass) {
+      throw new Error("Missing SMTP_USER or SMTP_PASS");
+    }
+
+    return nodemailer.createTransport({
+      service: SMTP_SERVICE.trim(),
+      auth: {
+        user: SMTP_USER,
+        pass: normalizedPass
+      }
+    });
   }
 
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: SMTP_SECURE === "true",
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS
-    }
-  });
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !normalizedPass) {
+    throw new Error("Missing SMTP configuration");
+  }
 }
 
 async function sendOtpEmail({ to, name, otpCode, subject, intro }) {
