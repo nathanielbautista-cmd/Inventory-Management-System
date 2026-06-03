@@ -22,7 +22,7 @@ app.use("/api/inventory-audits", inventoryAuditRoutes);
 const salesRoutes = require("./routes/sales");
 app.use("/api/sales", salesRoutes);
 
-const dashboardRoutes = require("./routes/Dashboard");
+const dashboardRoutes = require("./routes/dashboard");
 app.use("/api/dashboard", dashboardRoutes);
 
 const PORT = process.env.PORT || 5000;
@@ -35,4 +35,8 @@ mongoose.connect(MONGO_URI)
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;
