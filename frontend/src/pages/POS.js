@@ -10,6 +10,7 @@ function POS() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isProcessing, setIsProcessing] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showConfirmOrder, setShowConfirmOrder] = useState(false);
   const [lastTransaction, setLastTransaction] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
 
@@ -122,6 +123,7 @@ function POS() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      setShowConfirmOrder(false);
       setLastTransaction({
         items: [...cart],
         total: subtotal,
@@ -139,6 +141,11 @@ function POS() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleReviewOrder = () => {
+    if (cart.length === 0 || isProcessing) return;
+    setShowConfirmOrder(true);
   };
 
   return (
@@ -277,14 +284,86 @@ function POS() {
             </div>
             <button
               className="confirm-pay-btn"
-              onClick={handleCheckout}
+              onClick={handleReviewOrder}
               disabled={cart.length === 0 || isProcessing}
             >
-              {isProcessing ? "Processing..." : `PAY VIA ${paymentMethod.toUpperCase()}`}
+              {isProcessing
+                ? "Processing..."
+                : `REVIEW ${paymentMethod.toUpperCase()} ORDER`}
             </button>
           </div>
         </aside>
       </div>
+
+      {showConfirmOrder &&
+        ReactDOM.createPortal(
+          <div className="receipt-overlay">
+            <div className="confirm-order-modal">
+              <div className="confirm-order-header">
+                <div>
+                  <h2>Confirm Order</h2>
+                  <p>Review the order before completing payment.</p>
+                </div>
+                <button
+                  className="confirm-order-close"
+                  onClick={() => setShowConfirmOrder(false)}
+                  disabled={isProcessing}
+                  aria-label="Close confirm order"
+                >
+                  x
+                </button>
+              </div>
+
+              <div className="confirm-order-list">
+                {cart.map((item) => {
+                  const quantity = parseInt(item.qty, 10) || 0;
+                  return (
+                    <div key={item._id} className="confirm-order-line">
+                      <div>
+                        <strong>{item.name}</strong>
+                        <span>
+                          {quantity} x PHP {Number(item.price).toLocaleString()}
+                        </span>
+                      </div>
+                      <strong>
+                        PHP {(Number(item.price) * quantity).toLocaleString()}
+                      </strong>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="confirm-order-summary">
+                <div>
+                  <span>Payment Method</span>
+                  <strong>{paymentMethod}</strong>
+                </div>
+                <div>
+                  <span>Total Amount</span>
+                  <strong>PHP {subtotal.toLocaleString()}</strong>
+                </div>
+              </div>
+
+              <div className="confirm-order-actions">
+                <button
+                  className="cancel-order-btn"
+                  onClick={() => setShowConfirmOrder(false)}
+                  disabled={isProcessing}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="place-order-btn"
+                  onClick={handleCheckout}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? "Processing..." : "Confirm Order"}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {showReceipt &&
         ReactDOM.createPortal(
