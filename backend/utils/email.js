@@ -40,6 +40,7 @@ function createTransporter() {
       host: SMTP_HOST,
       port: Number(SMTP_PORT),
       secure: SMTP_SECURE === "true",
+      family: 4,
       auth: {
         user: SMTP_USER,
         pass: normalizedPass
