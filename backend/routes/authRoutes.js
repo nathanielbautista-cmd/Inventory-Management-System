@@ -17,7 +17,10 @@ function getEmailErrorMessage(error) {
     return error.message;
   }
 
-  return "Failed to send verification OTP email.";
+  const detail = error?.code || error?.responseCode || error?.command || error?.message;
+  return detail
+    ? `Failed to send verification OTP email. SMTP detail: ${detail}`
+    : "Failed to send verification OTP email.";
 }
 
 function generateOtp() {
