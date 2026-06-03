@@ -26,10 +26,15 @@ const dashboardRoutes = require("./routes/dashboard");
 app.use("/api/dashboard", dashboardRoutes);
 
 const PORT = process.env.PORT || 5000;
+const LOCAL_MONGO_URI = "mongodb://127.0.0.1:27017/InventorymDB";
 const MONGO_URI =
   process.env.MONGODB_URI ||
   process.env.MONGO_URI ||
-  "mongodb://127.0.0.1:27017/InventorymDB";
+  (process.env.NODE_ENV === "production" ? "" : LOCAL_MONGO_URI);
+
+if (!MONGO_URI) {
+  throw new Error("Missing MONGODB_URI environment variable.");
+}
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
