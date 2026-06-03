@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaUser, FaLock, FaEnvelope, FaChevronRight, FaTimes } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./Login.css";
-
-const API_BASE_URL = "http://localhost:5000/api";
 
 function Login() {
   const navigate = useNavigate();

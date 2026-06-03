@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaUserPlus, FaSearch, FaUserEdit, FaTrashAlt, FaTimes, FaShieldAlt, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./ManageUsers.css";
 
 const formatRoleLabel = (role) => {
@@ -40,7 +41,7 @@ function ManageUsers() {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get("http://localhost:5000/api/users", config);
+      const res = await axios.get(`${API_BASE_URL}/users`, config);
       setUsers(Array.isArray(res.data) ? res.data : []);
       setFetchError("");
     } catch (error) {
@@ -76,7 +77,7 @@ function ManageUsers() {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`http://localhost:5000/api/users/${id}`, { status }, config);
+      await axios.put(`${API_BASE_URL}/users/${id}`, { status }, config);
       showFeedback("User status updated successfully!", "success");
       fetchUsers();
       setEditUser(null);
@@ -89,7 +90,7 @@ function ManageUsers() {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`http://localhost:5000/api/users/${id}`, config);
+      await axios.delete(`${API_BASE_URL}/users/${id}`, config);
       showFeedback("User has been removed.", "success");
       fetchUsers();
       setDeleteUser(null);
@@ -224,7 +225,7 @@ const SignupModal = ({ onClose, onSuccess, onError, existingUsers }) => {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.post("http://localhost:5000/api/users/create", formData, config);
+      await axios.post(`${API_BASE_URL}/users/create`, formData, config);
       onSuccess("New user account created. OTP will be sent when the user logs in."); 
       onClose();
     } catch (error) { 

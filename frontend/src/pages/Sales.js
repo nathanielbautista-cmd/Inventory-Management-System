@@ -6,6 +6,7 @@ import {
   FaBox,
   FaCalendarAlt,
 } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./Sales.css";
 
 const getSaleItems = (sale) => {
@@ -61,8 +62,8 @@ function Sales() {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const [salesRes, productsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/sales", config),
-        axios.get("http://localhost:5000/api/products", config),
+        axios.get(`${API_BASE_URL}/sales`, config),
+        axios.get(`${API_BASE_URL}/products`, config),
       ]);
 
       const salesData = Array.isArray(salesRes.data) ? salesRes.data : [];

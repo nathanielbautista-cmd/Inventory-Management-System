@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { FaCamera, FaLock, FaTimes, FaUserCircle } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./ProfileModal.css";
 
 function ProfileModal({ isOpen, onClose, roleLabel, onProfileSaved }) {
@@ -28,7 +29,7 @@ function ProfileModal({ isOpen, onClose, roleLabel, onProfileSaved }) {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/users/me", {
+        const res = await axios.get(`${API_BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -93,7 +94,7 @@ function ProfileModal({ isOpen, onClose, roleLabel, onProfileSaved }) {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        "http://localhost:5000/api/users/me/profile",
+        `${API_BASE_URL}/users/me/profile`,
         {
           name: accountForm.name,
           phoneNumber: accountForm.phoneNumber,
@@ -136,7 +137,7 @@ function ProfileModal({ isOpen, onClose, roleLabel, onProfileSaved }) {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        "http://localhost:5000/api/users/me/password",
+        `${API_BASE_URL}/users/me/password`,
         passwordForm,
         {
           headers: { Authorization: `Bearer ${token}` },

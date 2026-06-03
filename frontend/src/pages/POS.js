@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
+import API_BASE_URL from "../config/api";
 import "./POS.css";
 
 function POS() {
@@ -19,7 +20,7 @@ function POS() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products", {
+      const res = await axios.get(`${API_BASE_URL}/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(res.data);
@@ -111,7 +112,7 @@ function POS() {
     setIsProcessing(true);
     try {
       await axios.post(
-        "http://localhost:5000/api/sales/create",
+        `${API_BASE_URL}/sales/create`,
         {
           items: cart.map((item) => ({
             productId: item._id,

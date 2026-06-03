@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import API_BASE_URL from "../config/api";
 
 function SignupModal({ onClose, onSuccess }) {
   const [name, setName] = useState("");
@@ -16,7 +17,7 @@ function SignupModal({ onClose, onSuccess }) {
     e.preventDefault();
     try {
       await axios.post(
-        "http://localhost:5000/api/auth/signup",
+        `${API_BASE_URL}/auth/signup`,
         { name, email, password, role },
         config
       );

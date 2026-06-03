@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { FaMicrophone, FaSpinner } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./InventoryAudit.css";
-
-const API_BASE_URL = "http://localhost:5000/api";
 
 function InventoryAudit() {
   const [products, setProducts] = useState([]);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import API_BASE_URL from "../config/api";
 import "./Dashboard.css";
 
 import {
@@ -146,7 +147,7 @@ function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get("http://localhost:5000/api/dashboard/stats", config);
+      const res = await axios.get(`${API_BASE_URL}/dashboard/stats`, config);
       setStats(res.data);
       setFetchError("");
     } catch (err) {
@@ -161,7 +162,7 @@ function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const res = await axios.get("http://localhost:5000/api/sales", config);
+      const res = await axios.get(`${API_BASE_URL}/sales`, config);
       const salesData = Array.isArray(res.data) ? res.data : [];
       setSales(salesData);
 

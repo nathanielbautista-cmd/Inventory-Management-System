@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaClipboardList, FaTimes } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./Inventory.css";
-
-const API_BASE_URL = "http://localhost:5000/api";
 
 function formatVariance(variance) {
   return variance > 0 ? `+${variance}` : String(variance);

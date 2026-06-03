@@ -7,6 +7,7 @@ import {
   FaFileDownload,
   FaExclamationTriangle
 } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./Inventory.css";
 
 function Inventory() {
@@ -35,7 +36,7 @@ function Inventory() {
 
   const fetchInventory = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/inventory", {
+      const res = await axios.get(`${API_BASE_URL}/inventory`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       setProducts(res.data);

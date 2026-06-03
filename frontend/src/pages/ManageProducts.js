@@ -5,6 +5,7 @@ import {
   FaPlus, FaEdit, FaTrash, FaSearch,
   FaBox, FaArrowRight, FaCheckCircle, FaExclamationCircle
 } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./ManageProducts.css";
 
 function ManageProducts() {
@@ -39,7 +40,7 @@ function ManageProducts() {
       const config = {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       };
-      const res = await axios.get("http://localhost:5000/api/products", config);
+      const res = await axios.get(`${API_BASE_URL}/products`, config);
       setProducts(res.data);
       setFetchError("");
     } catch (err) {
@@ -126,10 +127,10 @@ function ManageProducts() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       };
       if (editingProduct) {
-        await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, dataToSend, config);
+        await axios.put(`${API_BASE_URL}/products/${editingProduct._id}`, dataToSend, config);
         showFeedback("Product updated successfully!", "success");
       } else {
-        await axios.post("http://localhost:5000/api/products", dataToSend, config);
+        await axios.post(`${API_BASE_URL}/products`, dataToSend, config);
         showFeedback("Product created successfully!", "success");
       }
       closeModal();
@@ -162,7 +163,7 @@ function ManageProducts() {
       const config = {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       };
-      await axios.delete(`http://localhost:5000/api/products/${selectedProduct._id}`, config);
+      await axios.delete(`${API_BASE_URL}/products/${selectedProduct._id}`, config);
       showFeedback("Product deleted successfully.", "success");
       setShowDeleteModal(false);
       fetchProducts();

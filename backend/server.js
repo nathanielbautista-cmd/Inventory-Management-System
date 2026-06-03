@@ -25,10 +25,14 @@ app.use("/api/sales", salesRoutes);
 const dashboardRoutes = require("./routes/Dashboard");
 app.use("/api/dashboard", dashboardRoutes);
 
-mongoose.connect("mongodb://127.0.0.1:27017/InventorymDB")
-  .then(() => console.log("MongoDB Connected"));
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/InventorymDB";
+
+mongoose.connect(MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((error) => console.error("MongoDB connection error:", error.message));
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

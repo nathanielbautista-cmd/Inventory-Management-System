@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaChevronRight, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
+import API_BASE_URL from "../config/api";
 import "./AdminSetup.css";
-
-const API_BASE_URL = "http://localhost:5000/api";
 
 function AdminSetup() {
   const navigate = useNavigate();
