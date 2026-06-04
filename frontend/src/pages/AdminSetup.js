@@ -36,18 +36,7 @@ function AdminSetup() {
         setEmailConfigured(Boolean(res.data.emailConfigured));
         setPendingEmail(res.data.pendingAdminEmail || "");
 
-        if (res.data.mode === "pending-verification") {
-          setStatus("verify");
-          setEmail(res.data.pendingAdminEmail || "");
-          return;
-        }
-
-        if (res.data.mode === "available") {
-          setStatus("available");
-          return;
-        }
-
-        setStatus("closed");
+        setStatus("available");
       } catch (error) {
         console.error(error);
         setStatus("error");
@@ -91,8 +80,6 @@ function AdminSetup() {
         setPendingEmail(data.email || email);
         setEmail(data.email || email);
         setStatus("verify");
-      } else if (error.response?.status === 403) {
-        setStatus("closed");
       }
     } finally {
       setLoading(false);
@@ -145,7 +132,7 @@ function AdminSetup() {
           <div className="imp-brand-content">
             <div className="imp-logo-space">Mini Mart Inventory System</div>
             <div className="imp-accent-line"></div>
-            <h3>Create and verify the first administrator account</h3>
+            <h3>Create and verify an administrator account</h3>
           </div>
           <div className="imp-gradient-orb 1"></div>
           <div className="imp-gradient-orb 2"></div>
@@ -158,7 +145,7 @@ function AdminSetup() {
               <p>
                 {status === "verify"
                   ? "Enter the OTP code sent to the admin email address."
-                  : "This page works only until the first admin account exists."}
+                  : "Admin account setup is available from this page."}
               </p>
             </div>
 
@@ -176,20 +163,11 @@ function AdminSetup() {
               <p className="admin-setup-note">Please try again in a moment.</p>
             ) : null}
 
-            {status === "closed" ? (
-              <div className="admin-setup-closed">
-                <p>The first admin account has already been created.</p>
-                <Link to="/" className="admin-setup-link">
-                  Back to login
-                </Link>
-              </div>
-            ) : null}
-
             {status === "available" && !emailConfigured ? (
               <div className="admin-setup-closed">
                 <p>Email OTP is not configured on the server yet.</p>
                 <p className="admin-setup-note">
-                  Add your SMTP settings in the backend `.env` before creating the first admin.
+                  Add your email settings in the backend environment before creating an admin.
                 </p>
                 <Link to="/" className="admin-setup-link">
                   Back to login

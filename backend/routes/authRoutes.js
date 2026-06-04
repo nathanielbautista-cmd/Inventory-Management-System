@@ -31,35 +31,7 @@ function validatePassword(password) {
   return passwordRegex.test(password);
 }
 
-async function hasAdminAccount() {
-  const adminCount = await User.countDocuments({ role: "admin" });
-  return adminCount > 0;
-}
-
 async function getAdminSetupState() {
-  const verifiedAdmin = await User.findOne({
-    role: "admin",
-    isVerified: true,
-    status: "Active",
-  });
-
-  if (verifiedAdmin) {
-    return { mode: "closed" };
-  }
-
-  const pendingAdmin = await User.findOne({
-    role: "admin",
-    isVerified: false,
-    status: "Pending",
-  }).sort({ createdAt: -1 });
-
-  if (pendingAdmin) {
-    return {
-      mode: "pending-verification",
-      pendingAdminEmail: pendingAdmin.email,
-    };
-  }
-
   return { mode: "available" };
 }
 
@@ -114,23 +86,9 @@ router.get("/admin-setup-status", async (req, res) => {
 
 router.post("/setup-admin", async (req, res) => {
   try {
-    const setupState = await getAdminSetupState();
-
-    if (setupState.mode === "closed") {
-      return res.status(403).json({ message: "Admin setup is already completed" });
-    }
-
     if (!isEmailConfigured()) {
       return res.status(400).json({
         message: "Email OTP is not configured on the server."
-      });
-    }
-
-    if (setupState.mode === "pending-verification") {
-      return res.status(409).json({
-        message: "A pending admin account already exists. Verify that account to continue.",
-        requiresVerification: true,
-        email: setupState.pendingAdminEmail,
       });
     }
 
@@ -173,7 +131,7 @@ router.post("/setup-admin", async (req, res) => {
       name: admin.name,
       otpCode: admin.otpCode,
       subject: "Verify your admin account",
-      intro: "Use this OTP code to verify your first admin account."
+      intro: "Use this OTP code to verify your admin account."
     });
 
     res.status(201).json({
@@ -191,12 +149,6 @@ router.post("/setup-admin/resend-otp", async (req, res) => {
   try {
     if (!isEmailConfigured()) {
       return res.status(400).json({ message: "Email OTP is not configured on the server." });
-    }
-
-    const setupState = await getAdminSetupState();
-
-    if (setupState.mode !== "pending-verification") {
-      return res.status(400).json({ message: "There is no pending admin account to verify." });
     }
 
     const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
@@ -222,7 +174,7 @@ router.post("/setup-admin/resend-otp", async (req, res) => {
       name: admin.name,
       otpCode: admin.otpCode,
       subject: "Verify your admin account",
-      intro: "Use this OTP code to verify your first admin account."
+      intro: "Use this OTP code to verify your admin account."
     });
 
     res.json({ message: "Verification OTP sent to email" });

@@ -269,7 +269,7 @@ function Login() {
 
               {adminSetupAvailable ? (
                 <div className="imp-admin-setup-cta">
-                  <span>Need admin setup access?</span>
+                  <span>Don't have an admin account?</span>
                   <Link to="/setup-admin" className="imp-inline-link">
                     Create admin account
                   </Link>
