@@ -26,13 +26,13 @@ function Login() {
   const [verifyEmailLocked, setVerifyEmailLocked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [adminSetupAvailable, setAdminSetupAvailable] = useState(false);
+  const [adminSetupAvailable, setAdminSetupAvailable] = useState(true);
 
   useEffect(() => {
     const checkAdminSetupStatus = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/auth/admin-setup-status`);
-        setAdminSetupAvailable(Boolean(res.data.requiresSetup));
+        await axios.get(`${API_BASE_URL}/auth/admin-setup-status`);
+        setAdminSetupAvailable(true);
       } catch (err) {
         console.error(err);
       }
@@ -269,9 +269,9 @@ function Login() {
 
               {adminSetupAvailable ? (
                 <div className="imp-admin-setup-cta">
-                  <span>Need to create the first admin account?</span>
+                  <span>Need admin setup access?</span>
                   <Link to="/setup-admin" className="imp-inline-link">
-                    Sign up as admin
+                    Create admin account
                   </Link>
                 </div>
               ) : null}
