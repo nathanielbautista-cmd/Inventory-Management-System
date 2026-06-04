@@ -16,6 +16,12 @@ const saleItemSchema = new mongoose.Schema(
 );
 
 const SaleSchema = new mongoose.Schema({
+  ownerAdminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    index: true,
+  },
   soldBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

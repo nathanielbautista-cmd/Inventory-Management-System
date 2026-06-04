@@ -141,11 +141,11 @@ function AdminSetup() {
         <div className="imp-form-panel">
           <div className="imp-form-content">
             <div className="imp-form-header">
-              <h2>Admin Setup</h2>
+              <h2>Admin Sign Up</h2>
               <p>
                 {status === "verify"
                   ? "Enter the OTP code sent to the admin email address."
-                  : "Admin account setup is available from this page."}
+                  : ""}
               </p>
             </div>
 
@@ -167,7 +167,7 @@ function AdminSetup() {
               <div className="admin-setup-closed">
                 <p>Email OTP is not configured on the server yet.</p>
                 <p className="admin-setup-note">
-                  Add your email settings in the backend environment before creating an admin.
+        
                 </p>
                 <Link to="/" className="admin-setup-link">
                   Back to login

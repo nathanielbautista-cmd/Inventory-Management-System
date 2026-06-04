@@ -1,7 +1,9 @@
 const router = require("express").Router();
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Sale = require("../models/Sale");
 const auth = require("../middleware/auth");
+const { getOwnerAdminId } = require("../utils/ownership");
 
 router.get("/stats", auth, async (req, res) => {
   try {
@@ -9,9 +11,14 @@ router.get("/stats", auth, async (req, res) => {
       return res.status(403).json({ message: "Admin only" });
     }
 
-    const totalProducts = await Product.countDocuments();
-    const totalSales = await Sale.countDocuments();
+    const ownerAdminId = getOwnerAdminId(req);
+    const ownerObjectId = new mongoose.Types.ObjectId(ownerAdminId);
+    const totalProducts = await Product.countDocuments({ ownerAdminId });
+    const totalSales = await Sale.countDocuments({ ownerAdminId });
     const analytics = await Sale.aggregate([
+      {
+        $match: { ownerAdminId: ownerObjectId },
+      },
       {
         $group: {
           _id: null,
@@ -24,6 +31,7 @@ router.get("/stats", auth, async (req, res) => {
     const stats = analytics[0] || { totalRevenue: 0, totalProfit: 0 };
 
     const lowStock = await Product.countDocuments({
+      ownerAdminId,
       stock: { $lte: 10 } 
     });
 

@@ -36,6 +36,12 @@ const inventoryAuditSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    ownerAdminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
   },
   { timestamps: true }
 );

@@ -58,6 +58,27 @@ async function normalizeUserRole(user) {
   }
 }
 
+async function ensureOwnerAdminId(user) {
+  if (!user.ownerAdminId && user.role === "admin") {
+    user.ownerAdminId = user._id;
+    await user.save();
+  }
+
+  return user.ownerAdminId || user._id;
+}
+
+function signAuthToken(user) {
+  return jwt.sign(
+    {
+      id: user._id,
+      role: user.role,
+      ownerAdminId: user.ownerAdminId || user._id,
+    },
+    process.env.JWT_SECRET || "secretkey",
+    { expiresIn: "1d" }
+  );
+}
+
 router.post("/signup", async (req, res) => {
   try {
     return res.status(403).json({
@@ -125,6 +146,8 @@ router.post("/setup-admin", async (req, res) => {
       isVerified: false,
       ...buildOtpFields("verify-email"),
     });
+    admin.ownerAdminId = admin._id;
+    await admin.save();
 
     await sendOtpEmail({
       to: admin.email,
@@ -202,16 +225,13 @@ router.post("/setup-admin/verify", async (req, res) => {
 
     admin.isVerified = true;
     admin.status = "Active";
+    admin.ownerAdminId = admin.ownerAdminId || admin._id;
     admin.otpCode = null;
     admin.otpPurpose = null;
     admin.otpExpiresAt = null;
     await admin.save();
 
-    const token = jwt.sign(
-      { id: admin._id, role: admin.role },
-      process.env.JWT_SECRET || "secretkey",
-      { expiresIn: "1d" }
-    );
+    const token = signAuthToken(admin);
 
     res.json({
       message: "Email verified successfully",
@@ -279,11 +299,8 @@ router.post("/login", async (req, res) => {
       return res.status(403).json({ message: "Account disabled" });
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET || "secretkey",
-      { expiresIn: "1d" }
-    );
+    await ensureOwnerAdminId(user);
+    const token = signAuthToken(user);
 
     res.json({
       token,
@@ -360,6 +377,9 @@ router.post("/verify-email", async (req, res) => {
 
     user.isVerified = true;
     user.status = "Active";
+    if (!user.ownerAdminId && user.role === "admin") {
+      user.ownerAdminId = user._id;
+    }
     user.otpCode = null;
     user.otpPurpose = null;
     user.otpExpiresAt = null;

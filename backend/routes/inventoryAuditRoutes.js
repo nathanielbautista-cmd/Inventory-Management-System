@@ -2,10 +2,11 @@ const router = require("express").Router();
 const auth = require("../middleware/auth");
 const InventoryAudit = require("../models/InventoryAudit");
 const Product = require("../models/Product");
+const { getOwnerAdminId } = require("../utils/ownership");
 
 router.get("/", auth, async (req, res) => {
   try {
-    const logs = await InventoryAudit.find()
+    const logs = await InventoryAudit.find({ ownerAdminId: getOwnerAdminId(req) })
       .populate("auditedBy", "name email role")
       .sort({ createdAt: -1 })
       .limit(200);
@@ -30,7 +31,11 @@ router.post("/", auth, async (req, res) => {
       return res.status(400).json({ message: "Physical count must be a non-negative whole number" });
     }
 
-    const product = await Product.findById(productId);
+    const ownerAdminId = getOwnerAdminId(req);
+    const product = await Product.findOne({
+      _id: productId,
+      ownerAdminId,
+    });
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -46,6 +51,7 @@ router.post("/", auth, async (req, res) => {
       physicalCount: parsedCount,
       variance,
       auditedBy: req.user.id || null,
+      ownerAdminId,
     });
 
     const populatedAuditLog = await InventoryAudit.findById(auditLog._id).populate(

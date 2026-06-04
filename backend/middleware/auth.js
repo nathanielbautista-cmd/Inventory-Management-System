@@ -8,6 +8,7 @@ module.exports = function (req, res, next) {
   try {
     const token = authHeader.split(" ")[1]; 
     const verified = jwt.verify(token, process.env.JWT_SECRET);
+    verified.ownerAdminId = verified.ownerAdminId || verified.id;
     req.user = verified;
     next();
   } catch (err) {

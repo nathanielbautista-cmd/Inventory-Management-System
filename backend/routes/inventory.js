@@ -1,11 +1,12 @@
 const router = require("express").Router();
 const Product = require("../models/Product");
 const auth = require("../middleware/auth");
+const { ownerQuery } = require("../utils/ownership");
 router.get("/", auth, async (req, res) => {
 
   try {
 
-    const products = await Product.find();
+    const products = await Product.find(ownerQuery(req));
 
     res.json(products);
 

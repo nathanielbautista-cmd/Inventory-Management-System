@@ -36,6 +36,13 @@ const userSchema = new mongoose.Schema({
     default: "cashier",
   },
 
+  ownerAdminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+    index: true,
+  },
+
   status: {
     type: String,
     enum: ["Active", "Disabled", "Pending"],

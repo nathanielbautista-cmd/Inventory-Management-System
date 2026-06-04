@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Product = require("../models/Product");
 const auth = require("../middleware/auth");
+const { getOwnerAdminId, ownerQuery } = require("../utils/ownership");
 router.post("/", auth, async (req, res) => {
   console.log("POST /api/products hit");
   console.log("Request Body:", req.body);
@@ -22,6 +23,7 @@ router.post("/", auth, async (req, res) => {
       stock,
       image,
       status,
+      ownerAdminId: getOwnerAdminId(req),
     });
 
     res.status(201).json(product);
@@ -32,7 +34,7 @@ router.post("/", auth, async (req, res) => {
 });
 router.get("/", auth, async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find(ownerQuery(req));
     res.json(products);
   } catch (err) {
     res.status(400).json(err.message);
@@ -40,9 +42,13 @@ router.get("/", auth, async (req, res) => {
 });
 router.put("/:id", auth, async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+    const { ownerAdminId, ...updates } = req.body;
+    const updated = await Product.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        ownerAdminId: getOwnerAdminId(req),
+      },
+      updates,
       { new: true }
     );
 
@@ -57,7 +63,10 @@ router.delete("/:id", auth, async (req, res) => {
       return res.status(403).json("Only admin allowed");
     }
 
-    await Product.findByIdAndDelete(req.params.id);
+    await Product.findOneAndDelete({
+      _id: req.params.id,
+      ownerAdminId: getOwnerAdminId(req),
+    });
     res.json("Deleted");
   } catch (err) {
     res.status(400).json(err.message);

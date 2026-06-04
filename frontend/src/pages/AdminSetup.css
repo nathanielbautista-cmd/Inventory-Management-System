@@ -13,6 +13,7 @@
 
 .admin-setup-link {
   display: inline-flex;
+  align-self: center;
   margin-top: 18px;
   color: var(--primary-deep);
   font-weight: 700;

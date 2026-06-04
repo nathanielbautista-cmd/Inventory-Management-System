@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const auth = require("../middleware/auth");
+const { getOwnerAdminId, ownerQuery } = require("../utils/ownership");
 
 function normalizeRole(role) {
   const normalizedRole =
@@ -41,7 +42,7 @@ router.get("/", auth, async (req, res) => {
       return res.status(403).json({ message: "Admin only" });
     }
 
-    const users = await User.find().select("-password");
+    const users = await User.find(ownerQuery(req)).select("-password");
     res.json(users);
 
   } catch (error) {
@@ -81,6 +82,7 @@ router.post("/create", auth, async (req, res) => {
       email,
       password: hashed,
       role: normalizedRole,
+      ownerAdminId: getOwnerAdminId(req),
       status: "Pending",
       otpCode: null,
       otpPurpose: null,
@@ -193,7 +195,14 @@ router.delete("/:id", auth, async (req, res) => {
       return res.status(403).json({ message: "Admin only" });
     }
 
-    await User.findByIdAndDelete(req.params.id);
+    const deletedUser = await User.findOneAndDelete({
+      _id: req.params.id,
+      ownerAdminId: getOwnerAdminId(req),
+    });
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     res.json({ message: "User deleted successfully" });
 
@@ -210,11 +219,18 @@ router.put("/:id", auth, async (req, res) => {
 
     const { status } = req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        ownerAdminId: getOwnerAdminId(req),
+      },
       { status },
       { new: true }
     );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     res.json(sanitizeUser(updatedUser));
 

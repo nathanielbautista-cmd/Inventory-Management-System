@@ -3,6 +3,7 @@ const Sale = require("../models/Sale");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const auth = require("../middleware/auth");
+const { getOwnerAdminId } = require("../utils/ownership");
 
 function canCreateSales(role) {
   return role === "admin" || role === "cashier";
@@ -26,9 +27,13 @@ router.post("/create", auth, async (req, res) => {
 
     const saleItems = [];
     let total = 0;
+    const ownerAdminId = getOwnerAdminId(req);
 
     for (const item of items) {
-      const product = await Product.findById(item.productId);
+      const product = await Product.findOne({
+        _id: item.productId,
+        ownerAdminId,
+      });
 
       if (!product) {
         return res.status(404).json(`Product not found: ${item.productId}`);
@@ -62,6 +67,7 @@ router.post("/create", auth, async (req, res) => {
     const user = await User.findById(req.user.id).select("name");
     const primaryItem = saleItems[0];
     const newSale = new Sale({
+      ownerAdminId,
       soldBy: req.user.id || null,
       soldByName: user?.name || "Unknown Staff",
       productId: primaryItem.productId,
@@ -87,7 +93,7 @@ router.get("/", auth, async (req, res) => {
       return res.status(403).json("Only admin or cashier can view sales");
     }
 
-    const sales = await Sale.find()
+    const sales = await Sale.find({ ownerAdminId: getOwnerAdminId(req) })
       .populate("soldBy", "name email role")
       .sort({ date: -1 });
     res.json(sales);
