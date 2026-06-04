@@ -145,7 +145,7 @@ function AdminSetup() {
           <div className="imp-brand-content">
             <div className="imp-logo-space">Mini Mart Inventory System</div>
             <div className="imp-accent-line"></div>
-            <h3>Create and verify the first administrator account for this deployment.</h3>
+            <h3>Create and verify the first administrator account</h3>
           </div>
           <div className="imp-gradient-orb 1"></div>
           <div className="imp-gradient-orb 2"></div>

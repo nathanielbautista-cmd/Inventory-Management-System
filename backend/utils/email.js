@@ -2,12 +2,20 @@ const nodemailer = require("nodemailer");
 
 function isEmailConfigured() {
   const {
+    PROMAILER_API_KEY,
+    PROMAILER_API_URL,
+    PROMAILER_FROM,
+    SMTP_FROM,
     SMTP_HOST,
     SMTP_PORT,
     SMTP_USER,
     SMTP_PASS,
     SMTP_SERVICE
   } = process.env;
+
+  if (PROMAILER_API_KEY && PROMAILER_API_URL && (PROMAILER_FROM || SMTP_FROM || SMTP_USER)) {
+    return true;
+  }
 
   if (SMTP_HOST && SMTP_PORT) {
     return Boolean(SMTP_USER && SMTP_PASS);
@@ -63,6 +71,56 @@ function createTransporter() {
   throw new Error("Missing SMTP configuration");
 }
 
+async function sendWithPromailer({ to, subject, text, html }) {
+  const {
+    PROMAILER_API_KEY,
+    PROMAILER_API_URL,
+    PROMAILER_CONNECTION_ID,
+    PROMAILER_FROM,
+    SMTP_FROM,
+    SMTP_USER
+  } = process.env;
+
+  if (!PROMAILER_API_KEY || !PROMAILER_API_URL) {
+    throw new Error("Missing ProMailer API configuration");
+  }
+
+  const from = PROMAILER_FROM || SMTP_FROM || SMTP_USER;
+
+  if (!from) {
+    throw new Error("Missing PROMAILER_FROM");
+  }
+
+  const response = await fetch(PROMAILER_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${PROMAILER_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      to,
+      subject,
+      text,
+      html,
+      from,
+      smtpId: PROMAILER_CONNECTION_ID,
+    }),
+  });
+
+  if (!response.ok) {
+    let message = `ProMailer email failed with status ${response.status}`;
+
+    try {
+      const errorBody = await response.json();
+      message = errorBody.message || errorBody.error || message;
+    } catch (error) {
+      // Keep the status-based message when ProMailer does not return JSON.
+    }
+
+    throw new Error(message);
+  }
+}
+
 async function sendOtpEmail({ to, name, otpCode, subject, intro }) {
   const text = `${intro}\n\nYour OTP code is: ${otpCode}\n\nThis code expires in 10 minutes.`;
   const html = `
@@ -76,6 +134,11 @@ async function sendOtpEmail({ to, name, otpCode, subject, intro }) {
       <p>This code expires in 10 minutes.</p>
     </div>
   `;
+
+  if (process.env.PROMAILER_API_KEY && process.env.PROMAILER_API_URL) {
+    await sendWithPromailer({ to, subject, text, html });
+    return;
+  }
 
   const transporter = createTransporter();
   const from = process.env.SMTP_FROM || process.env.SMTP_USER;
