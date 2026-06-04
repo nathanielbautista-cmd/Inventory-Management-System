@@ -9,10 +9,6 @@ function isEmailConfigured() {
     SMTP_SERVICE
   } = process.env;
 
-  if (SMTP_SERVICE) {
-    return Boolean(SMTP_USER && SMTP_PASS);
-  }
-
   return Boolean(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS);
 }
 
@@ -25,6 +21,22 @@ function createTransporter() {
     SMTP_PASS,
     SMTP_SERVICE
   } = process.env;
+
+  if (SMTP_HOST && SMTP_PORT) {
+    if (!SMTP_USER || !SMTP_PASS) {
+      throw new Error("Missing SMTP_USER or SMTP_PASS");
+    }
+
+    return nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: Number(SMTP_PORT),
+      secure: SMTP_SECURE === "true",
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS
+      }
+    });
+  }
 
   if (SMTP_SERVICE) {
     if (!SMTP_USER || !SMTP_PASS) {
@@ -40,19 +52,7 @@ function createTransporter() {
     });
   }
 
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-    throw new Error("Missing SMTP configuration");
-  }
-
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: SMTP_SECURE === "true",
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS
-    }
-  });
+  throw new Error("Missing SMTP configuration");
 }
 
 async function sendOtpEmail({ to, name, otpCode, subject, intro }) {
