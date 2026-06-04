@@ -43,7 +43,7 @@ app.use("/api/dashboard", dashboardRoutes);
 
 const PORT = process.env.PORT || 5000;
 const LOCAL_MONGO_URI = "mongodb://127.0.0.1:27017/InventorymDB";
-const MONGO_URI =
+const MONGO_URI = "mongodb+srv://atlasAdmin:atlasAdmin123456@inventory.w0tdhcr.mongodb.net/InventorymDB?retryWrites=true&w=majority&appName=Inventory";
   process.env.MONGODB_URI ||
   process.env.MONGO_URI ||
   (process.env.NODE_ENV === "production" ? "" : LOCAL_MONGO_URI);
