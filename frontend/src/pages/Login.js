@@ -32,8 +32,8 @@ function Login() {
   useEffect(() => {
     const checkAdminSetupStatus = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/auth/admin-setup-status`);
-        setAdminSetupAvailable(Boolean(res.data.requiresSetup));
+        await axios.get(`${API_BASE_URL}/auth/admin-setup-status`);
+        setAdminSetupAvailable(true);
       } catch (err) {
         console.error(err);
       }

@@ -31,13 +31,7 @@ function AdminSetup() {
         setEmailConfigured(Boolean(res.data.emailConfigured));
         setPendingEmail(res.data.pendingAdminEmail || "");
 
-        setStatus(
-          !res.data.requiresSetup
-            ? "closed"
-            : res.data.mode === "pending"
-            ? "verify"
-            : "available"
-        );
+        setStatus("available");
       } catch (error) {
         console.error(error);
         setStatus("error");
@@ -162,19 +156,6 @@ function AdminSetup() {
 
             {status === "error" ? (
               <p className="admin-setup-note">Please try again in a moment.</p>
-            ) : null}
-
-            {status === "closed" ? (
-              <div className="admin-setup-closed">
-                <p>Admin setup is already complete.</p>
-                <p className="admin-setup-note">
-                  Sign in as admin, then use Manage Users to create inventory staff,
-                  cashier, or another admin account.
-                </p>
-                <Link to="/" className="admin-setup-link">
-                  Back to login
-                </Link>
-              </div>
             ) : null}
 
             {status === "available" && !emailConfigured ? (

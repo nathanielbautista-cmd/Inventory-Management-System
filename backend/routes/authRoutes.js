@@ -1,8 +1,5 @@
 const router = require("express").Router();
 const User = require("../models/User");
-const Product = require("../models/Product");
-const Sale = require("../models/Sale");
-const InventoryAudit = require("../models/InventoryAudit");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { sendOtpEmail, isEmailConfigured } = require("../utils/email");
@@ -35,26 +32,6 @@ function validatePassword(password) {
 }
 
 async function getAdminSetupState() {
-  const activeAdmin = await User.findOne({
-    role: "admin",
-    status: { $ne: "Disabled" },
-    isVerified: true,
-  }).sort({ createdAt: 1, _id: 1 });
-
-  if (activeAdmin) {
-    return { mode: "closed" };
-  }
-
-  const pendingAdmin = await User.findOne({
-    role: "admin",
-    status: "Pending",
-    isVerified: false,
-  }).sort({ createdAt: 1, _id: 1 });
-
-  if (pendingAdmin) {
-    return { mode: "pending", pendingAdminEmail: pendingAdmin.email };
-  }
-
   return { mode: "available" };
 }
 
@@ -81,80 +58,13 @@ async function normalizeUserRole(user) {
   }
 }
 
-async function getPrimaryOwnerAdminId() {
-  const primaryAdmin = await User.findOne({
-    role: "admin",
-    status: { $ne: "Disabled" },
-    isVerified: true,
-  }).sort({ createdAt: 1, _id: 1 });
-
-  if (!primaryAdmin) {
-    return null;
-  }
-
-  if (!primaryAdmin.ownerAdminId) {
-    primaryAdmin.ownerAdminId = primaryAdmin._id;
-    await primaryAdmin.save();
-  }
-
-  return primaryAdmin.ownerAdminId || primaryAdmin._id;
-}
-
-async function assignMissingOwners(ownerAdminId) {
-  const missingOwnerQuery = {
-    $or: [
-      { ownerAdminId: null },
-      { ownerAdminId: { $exists: false } },
-    ],
-  };
-
-  await Promise.all([
-    User.updateMany(missingOwnerQuery, { $set: { ownerAdminId } }),
-    Product.updateMany(missingOwnerQuery, { $set: { ownerAdminId } }),
-    Sale.updateMany(missingOwnerQuery, { $set: { ownerAdminId } }),
-    InventoryAudit.updateMany(missingOwnerQuery, { $set: { ownerAdminId } }),
-  ]);
-}
-
-async function reassignOwnerRecords(fromOwnerAdminId, toOwnerAdminId) {
-  if (
-    !fromOwnerAdminId ||
-    !toOwnerAdminId ||
-    fromOwnerAdminId.toString() === toOwnerAdminId.toString()
-  ) {
-    return;
-  }
-
-  await Promise.all([
-    User.updateMany({ ownerAdminId: fromOwnerAdminId }, { $set: { ownerAdminId: toOwnerAdminId } }),
-    Product.updateMany({ ownerAdminId: fromOwnerAdminId }, { $set: { ownerAdminId: toOwnerAdminId } }),
-    Sale.updateMany({ ownerAdminId: fromOwnerAdminId }, { $set: { ownerAdminId: toOwnerAdminId } }),
-    InventoryAudit.updateMany({ ownerAdminId: fromOwnerAdminId }, { $set: { ownerAdminId: toOwnerAdminId } }),
-  ]);
-}
-
 async function ensureOwnerAdminId(user) {
-  const primaryOwnerAdminId = await getPrimaryOwnerAdminId();
-  const previousOwnerAdminId = user.ownerAdminId;
-  const ownerAdminId =
-    user.role === "admin"
-      ? primaryOwnerAdminId || user.ownerAdminId || user._id
-      : user.ownerAdminId || primaryOwnerAdminId || user._id;
-
-  if (user.role === "admin") {
-    await reassignOwnerRecords(previousOwnerAdminId, ownerAdminId);
-  }
-
-  if (!user.ownerAdminId || user.ownerAdminId.toString() !== ownerAdminId.toString()) {
-    user.ownerAdminId = ownerAdminId;
+  if (!user.ownerAdminId && user.role === "admin") {
+    user.ownerAdminId = user._id;
     await user.save();
   }
 
-  if (user.role === "admin") {
-    await assignMissingOwners(ownerAdminId);
-  }
-
-  return ownerAdminId;
+  return user.ownerAdminId || user._id;
 }
 
 function signAuthToken(user) {
@@ -197,13 +107,6 @@ router.get("/admin-setup-status", async (req, res) => {
 
 router.post("/setup-admin", async (req, res) => {
   try {
-    const setupState = await getAdminSetupState();
-    if (setupState.mode === "closed") {
-      return res.status(403).json({
-        message: "Admin setup is already complete. Sign in as admin to create users."
-      });
-    }
-
     if (!isEmailConfigured()) {
       return res.status(400).json({
         message: "Email OTP is not configured on the server."
