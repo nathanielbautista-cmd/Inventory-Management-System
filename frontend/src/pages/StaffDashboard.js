@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { FaBoxes, FaCashRegister, FaSignOutAlt } from "react-icons/fa";
 import "./StaffDashboard.css";
 import ProfileModal from "../components/ProfileModal";
+import { clearCurrentUserSession, normalizeRole } from "../utils/session";
 
 const MODULE_CONFIG = {
   inventory: {
@@ -22,8 +23,7 @@ const MODULE_CONFIG = {
 function StaffDashboard() {
   const location = useLocation();
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const rawRole = (localStorage.getItem("role") || "").trim().toLowerCase();
-  const role = rawRole === "staff" ? "inventory" : rawRole;
+  const role = normalizeRole(localStorage.getItem("role"));
   const [userProfile, setUserProfile] = useState({
     name: localStorage.getItem("userName") || "Staff Member",
     email: localStorage.getItem("userEmail") || "",
@@ -52,7 +52,7 @@ function StaffDashboard() {
   const { title, subtitle, Icon } = MODULE_CONFIG[role];
 
   const handleLogout = () => {
-    localStorage.clear();
+    clearCurrentUserSession();
     window.location.href = "/";
   };
 

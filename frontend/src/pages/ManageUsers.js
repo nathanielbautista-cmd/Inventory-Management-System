@@ -226,7 +226,7 @@ const SignupModal = ({ onClose, onSuccess, onError, existingUsers }) => {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
       await axios.post(`${API_BASE_URL}/users/create`, formData, config);
-      onSuccess("New user account created. OTP will be sent when the user logs in."); 
+      onSuccess("New user account created. This user can sign in now."); 
       onClose();
     } catch (error) { 
       onError(error.response?.data?.message || "Server error during creation."); 

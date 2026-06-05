@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaUser, FaLock, FaEnvelope, FaChevronRight, FaTimes } from "react-icons/fa";
 import API_BASE_URL from "../config/api";
+import { saveCurrentUserSession } from "../utils/session";
 import "./Login.css";
 
 function Login() {
@@ -62,15 +63,7 @@ function Login() {
         password,
       });
 
-      const role = res.data.user.role?.trim().toLowerCase();
-      const normalizedRole = role === "staff" ? "inventory" : role;
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userId", res.data.user.id || "");
-      localStorage.setItem("role", normalizedRole);
-      localStorage.setItem("userName", res.data.user.name || "");
-      localStorage.setItem("userEmail", res.data.user.email || "");
-      localStorage.setItem("userPhoneNumber", res.data.user.phoneNumber || "");
-      localStorage.setItem("userAvatar", res.data.user.avatar || "");
+      const normalizedRole = saveCurrentUserSession(res.data);
 
       if (normalizedRole === "admin") {
         navigate("/admin", { replace: true });

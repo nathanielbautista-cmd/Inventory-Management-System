@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaChevronRight, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import API_BASE_URL from "../config/api";
+import { saveCurrentUserSession } from "../utils/session";
 import "./AdminSetup.css";
 
 function AdminSetup() {
@@ -20,13 +21,7 @@ function AdminSetup() {
   const [loading, setLoading] = useState(false);
 
   const applyAuth = (data) => {
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("userId", data.user.id || "");
-    localStorage.setItem("role", data.user.role || "admin");
-    localStorage.setItem("userName", data.user.name || "");
-    localStorage.setItem("userEmail", data.user.email || "");
-    localStorage.setItem("userPhoneNumber", data.user.phoneNumber || "");
-    localStorage.setItem("userAvatar", data.user.avatar || "");
+    saveCurrentUserSession(data);
   };
 
   useEffect(() => {

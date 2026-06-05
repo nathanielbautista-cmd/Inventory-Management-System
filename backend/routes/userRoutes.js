@@ -83,17 +83,17 @@ router.post("/create", auth, async (req, res) => {
       password: hashed,
       role: normalizedRole,
       ownerAdminId: getOwnerAdminId(req),
-      status: "Pending",
+      status: "Active",
       otpCode: null,
       otpPurpose: null,
       otpExpiresAt: null,
-      isVerified: false
+      isVerified: true
     });
 
     res.json({
       ...user.toObject(),
       password: undefined,
-      message: "User created successfully. Verification OTP will be sent on first login."
+      message: "User created successfully. This account can sign in now."
     });
 
   } catch (error) {

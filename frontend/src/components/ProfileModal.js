@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { FaCamera, FaLock, FaTimes, FaUserCircle } from "react-icons/fa";
 import API_BASE_URL from "../config/api";
+import { updateStoredUserProfile } from "../utils/session";
 import "./ProfileModal.css";
 
 function ProfileModal({ isOpen, onClose, roleLabel, onProfileSaved }) {
@@ -107,10 +108,7 @@ function ProfileModal({ isOpen, onClose, roleLabel, onProfileSaved }) {
 
       const updatedUser = res.data.user;
       setProfile(updatedUser);
-      localStorage.setItem("userName", updatedUser.name || "");
-      localStorage.setItem("userEmail", updatedUser.email || "");
-      localStorage.setItem("userPhoneNumber", updatedUser.phoneNumber || "");
-      localStorage.setItem("userAvatar", updatedUser.avatar || "");
+      updateStoredUserProfile(updatedUser);
       setAccountMessage({
         text: res.data.message || "Profile updated successfully.",
         type: "success",

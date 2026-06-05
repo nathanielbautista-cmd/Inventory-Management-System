@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "secretkey";
 
 module.exports = function (req, res, next) {
   const authHeader = req.header("Authorization");
@@ -7,7 +8,7 @@ module.exports = function (req, res, next) {
 
   try {
     const token = authHeader.split(" ")[1]; 
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    const verified = jwt.verify(token, JWT_SECRET);
     verified.ownerAdminId = verified.ownerAdminId || verified.id;
     req.user = verified;
     next();

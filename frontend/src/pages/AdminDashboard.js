@@ -7,6 +7,7 @@ import Inventory from "./Inventory";
 import InventoryRecords from "./InventoryRecords";
 import Sales from "./Sales";
 import ProfileModal from "../components/ProfileModal";
+import { clearCurrentUserSession } from "../utils/session";
 
 function AdminDashboard() {
   const [activePage, setActivePage] = useState("dashboard");
@@ -114,7 +115,7 @@ function AdminDashboard() {
         <button
           className="logout-btnn"
           onClick={() => {
-            localStorage.clear();
+            clearCurrentUserSession();
             window.location.href = "/";
           }}
         >
