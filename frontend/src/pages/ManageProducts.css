@@ -163,8 +163,41 @@
 
 .input-group { margin-bottom: 1rem; }
 .input-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #475569; }
-.input-group input, .input-group select {
+.input-group input, .input-group select, .input-group textarea {
   width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;
+}
+
+.input-group textarea {
+  resize: vertical;
+  min-height: 78px;
+}
+
+.product-meta-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.product-meta-stack span {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.stock-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 800;
+}
+
+.stock-count.critical {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 .input-helper {

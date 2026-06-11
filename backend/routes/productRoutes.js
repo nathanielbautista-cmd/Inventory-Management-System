@@ -12,15 +12,37 @@ router.post("/", auth, async (req, res) => {
 
     console.log("BODY RECEIVED:", req.body);
 
-    const { name, category, initialPrice, price, stock, status, image } =
-      req.body;
+    const {
+      name,
+      category,
+      brand,
+      description,
+      initialPrice,
+      costPrice,
+      price,
+      unitPrice,
+      barcode,
+      stock,
+      reorderLevel,
+      status,
+      image,
+    } = req.body;
+
+    const normalizedCost = Number(costPrice ?? initialPrice);
+    const normalizedPrice = Number(unitPrice ?? price);
 
     const product = await Product.create({
       name,
       category,
-      initialPrice,
-      price,
-      stock,
+      brand,
+      description,
+      initialPrice: normalizedCost,
+      costPrice: normalizedCost,
+      price: normalizedPrice,
+      unitPrice: normalizedPrice,
+      barcode,
+      stock: Number(stock),
+      reorderLevel: Number(reorderLevel ?? 10),
       image,
       status,
       ownerAdminId: getOwnerAdminId(req),
@@ -43,6 +65,22 @@ router.get("/", auth, async (req, res) => {
 router.put("/:id", auth, async (req, res) => {
   try {
     const { ownerAdminId, ...updates } = req.body;
+
+    if (updates.costPrice !== undefined || updates.initialPrice !== undefined) {
+      const normalizedCost = Number(updates.costPrice ?? updates.initialPrice);
+      updates.initialPrice = normalizedCost;
+      updates.costPrice = normalizedCost;
+    }
+
+    if (updates.unitPrice !== undefined || updates.price !== undefined) {
+      const normalizedPrice = Number(updates.unitPrice ?? updates.price);
+      updates.price = normalizedPrice;
+      updates.unitPrice = normalizedPrice;
+    }
+
+    if (updates.stock !== undefined) updates.stock = Number(updates.stock);
+    if (updates.reorderLevel !== undefined) updates.reorderLevel = Number(updates.reorderLevel);
+
     const updated = await Product.findOneAndUpdate(
       {
         _id: req.params.id,

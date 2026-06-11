@@ -111,7 +111,7 @@ function POS() {
 
     setIsProcessing(true);
     try {
-      await axios.post(
+      const res = await axios.post(
         `${API_BASE_URL}/sales/create`,
         {
           items: cart.map((item) => ({
@@ -126,6 +126,7 @@ function POS() {
       );
       setShowConfirmOrder(false);
       setLastTransaction({
+        transactionId: res.data?._id,
         items: [...cart],
         total: subtotal,
         date: new Date(),
@@ -371,6 +372,7 @@ function POS() {
           <div className="receipt-overlay">
             <div className="receipt-modal">
               <h2>Transaction Successful</h2>
+              <p>Transaction ID: {lastTransaction?.transactionId || "Pending"}</p>
               <p>Paid via {lastTransaction?.method}</p>
               <div className="receipt-details">
                 {lastTransaction?.items.map((item) => (
@@ -387,6 +389,12 @@ function POS() {
                   Total Paid: PHP {lastTransaction?.total.toLocaleString()}
                 </strong>
               </div>
+              <button
+                className="close-receipt"
+                onClick={() => window.print()}
+              >
+                PRINT
+              </button>
               <button
                 className="close-receipt"
                 onClick={() => setShowReceipt(false)}

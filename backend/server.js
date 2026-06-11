@@ -32,6 +32,15 @@ app.use("/api/sales", salesRoutes);
 const dashboardRoutes = require("./routes/dashboard");
 app.use("/api/dashboard", dashboardRoutes);
 
+const stockMovementRoutes = require("./routes/stockMovements");
+app.use("/api/stock-movements", stockMovementRoutes);
+
+const supplierRoutes = require("./routes/suppliers");
+app.use("/api/suppliers", supplierRoutes);
+
+const reportRoutes = require("./routes/reports");
+app.use("/api/reports", reportRoutes);
+
 const PORT = process.env.PORT || 5000;
 const LOCAL_MONGO_URI = "mongodb://127.0.0.1:27017/InventorymDB";
 const MONGODB_DIRECT_URI = process.env.MONGODB_DIRECT_URI?.trim();

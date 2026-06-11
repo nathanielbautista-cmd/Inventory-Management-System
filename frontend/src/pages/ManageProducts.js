@@ -21,9 +21,13 @@ function ManageProducts() {
   const [formData, setFormData] = useState({
     name: "",
     category: "",
+    brand: "",
+    description: "",
     initialPrice: "",
     price: "",
+    barcode: "",
     stock: "",
+    reorderLevel: "10",
     image: "",
     status: "Active",
   });
@@ -117,8 +121,11 @@ function ManageProducts() {
     const dataToSend = {
       ...formData,
       initialPrice: initialPriceNum,
+      costPrice: initialPriceNum,
       price: priceNum,
+      unitPrice: priceNum,
       stock: stockNum,
+      reorderLevel: parseInt(formData.reorderLevel, 10) || 10,
       profit: priceNum - initialPriceNum,
     };
 
@@ -149,9 +156,13 @@ function ManageProducts() {
     setFormData({
       name: product.name || "",
       category: product.category || "",
+      brand: product.brand || "",
+      description: product.description || "",
       initialPrice: product.initialPrice ?? "",
       price: product.price ?? "",
+      barcode: product.barcode || "",
       stock: product.stock ?? "",
+      reorderLevel: product.reorderLevel ?? 10,
       image: product.image || "",
       status: product.status || "Active",
     });
@@ -178,9 +189,13 @@ function ManageProducts() {
     setFormData({
       name: "",
       category: "",
+      brand: "",
+      description: "",
       initialPrice: "",
       price: "",
+      barcode: "",
       stock: "",
+      reorderLevel: "10",
       image: "",
       status: "Active",
     });
@@ -188,7 +203,9 @@ function ManageProducts() {
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchTerm.toLowerCase())
+    p.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.brand || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.barcode || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -239,6 +256,7 @@ function ManageProducts() {
             <tr>
               <th>Item Details</th>
               <th>Category</th>
+              <th>Brand / Barcode</th>
               <th>Pricing (Capital - Sale)</th>
               <th>Stock</th>
               <th>Status</th>
@@ -260,6 +278,12 @@ function ManageProducts() {
                 </td>
                 <td><span className="cat-pill">{p.category}</span></td>
                 <td>
+                  <div className="product-meta-stack">
+                    <strong>{p.brand || "No brand"}</strong>
+                    <span>{p.barcode || "No barcode"}</span>
+                  </div>
+                </td>
+                <td>
                   <div className="price-flow">
                     <span className="cap-price">PHP {p.initialPrice}</span>
                     <FaArrowRight className="flow-arrow" />
@@ -267,8 +291,8 @@ function ManageProducts() {
                   </div>
                 </td>
                 <td>
-                  <div className={`stock-count ${p.stock < 10 ? "critical" : ""}`}>
-                    {p.stock}
+                  <div className={`stock-count ${p.stock <= (p.reorderLevel ?? 10) ? "critical" : ""}`}>
+                    {p.stock} / {p.reorderLevel ?? 10}
                   </div>
                 </td>
                 <td>
@@ -302,19 +326,37 @@ function ManageProducts() {
                   <input type="text" name="category" value={formData.category} onChange={handleChange} required />
                 </div>
                 <div className="input-group">
-                  <label>Initial Price</label>
+                  <label>Brand</label>
+                  <input type="text" name="brand" value={formData.brand} onChange={handleChange} />
+                </div>
+              </div>
+              <div className="input-group">
+                <label>Description</label>
+                <textarea name="description" value={formData.description} onChange={handleChange} rows="3" />
+              </div>
+              <div className="input-row">
+                <div className="input-group">
+                  <label>Cost Price</label>
                   <input type="number" name="initialPrice" value={formData.initialPrice} onChange={handleChange} required />
+                </div>
+                <div className="input-group">
+                  <label>Unit Price</label>
+                  <input type="number" name="price" value={formData.price} onChange={handleChange} required />
                 </div>
               </div>
               <div className="input-row">
                 <div className="input-group">
-                  <label>Selling Price</label>
-                  <input type="number" name="price" value={formData.price} onChange={handleChange} required />
-                </div>
-                <div className="input-group">
-                  <label>Stock</label>
+                  <label>Stock Quantity</label>
                   <input type="number" name="stock" value={formData.stock} onChange={handleChange} required />
                 </div>
+                <div className="input-group">
+                  <label>Reorder Level</label>
+                  <input type="number" name="reorderLevel" value={formData.reorderLevel} onChange={handleChange} required />
+                </div>
+              </div>
+              <div className="input-group">
+                <label>Barcode</label>
+                <input type="text" name="barcode" value={formData.barcode} onChange={handleChange} />
               </div>
               <div className="input-group">
                 <label>Product Image</label>

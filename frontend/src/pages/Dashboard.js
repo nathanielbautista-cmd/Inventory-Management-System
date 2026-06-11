@@ -21,6 +21,7 @@ import {
   FaMoneyBillWave,
   FaChartLine,
   FaExclamationTriangle,
+  FaTruck,
 } from "react-icons/fa";
 
 ChartJS.register(
@@ -116,6 +117,9 @@ function Dashboard() {
     totalRevenue: 0,
     lowStock: 0,
     totalProfit: 0,
+    totalSuppliers: 0,
+    fastMovingProducts: [],
+    slowMovingProducts: [],
   });
 
   const [topProducts, setTopProducts] = useState([]);
@@ -340,6 +344,38 @@ function Dashboard() {
             <p className={`stat-value ${stats.lowStock > 0 ? "text-danger" : ""}`}>
               {stats.lowStock}
             </p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon suppliers">
+            <FaTruck />
+          </div>
+          <div className="stat-info">
+            <h3>Total Suppliers</h3>
+            <p className="stat-value">{stats.totalSuppliers || 0}</p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon fast">
+            <FaChartLine />
+          </div>
+          <div className="stat-info">
+            <h3>Fast Moving</h3>
+            <p className="stat-value">{stats.fastMovingProducts?.[0]?.name || "None"}</p>
+            <span className="growth-indicator">{stats.fastMovingProducts?.[0]?.units || 0} units</span>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon slow">
+            <FaBoxes />
+          </div>
+          <div className="stat-info">
+            <h3>Slow Moving</h3>
+            <p className="stat-value">{stats.slowMovingProducts?.[0]?.name || "None"}</p>
+            <span className="growth-indicator">{stats.slowMovingProducts?.[0]?.units || 0} units</span>
           </div>
         </div>
       </div>

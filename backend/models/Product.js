@@ -9,17 +9,41 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  brand: {
+    type: String,
+    default: "",
+  },
+  description: {
+    type: String,
+    default: "",
+  },
+  barcode: {
+    type: String,
+    default: "",
+  },
   initialPrice: {
     type: Number,
     required: true,
+  },
+  costPrice: {
+    type: Number,
+    default: 0,
   },
   price: {
     type: Number,
     required: true,
   },
+  unitPrice: {
+    type: Number,
+    default: 0,
+  },
   stock: {
     type: Number,
     required: true,
+  },
+  reorderLevel: {
+    type: Number,
+    default: 10,
   },
   image: {
     type: String,

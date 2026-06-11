@@ -2,6 +2,7 @@ const router = require("express").Router();
 const Sale = require("../models/Sale");
 const Product = require("../models/Product");
 const User = require("../models/User");
+const StockMovement = require("../models/StockMovement");
 const auth = require("../middleware/auth");
 const { getOwnerAdminId } = require("../utils/ownership");
 
@@ -26,6 +27,7 @@ router.post("/create", auth, async (req, res) => {
     }
 
     const saleItems = [];
+    const stockChanges = [];
     let total = 0;
     const ownerAdminId = getOwnerAdminId(req);
 
@@ -60,8 +62,17 @@ router.post("/create", auth, async (req, res) => {
         lineTotal,
       });
 
-      product.stock -= quantity;
+      const previousStock = Number(product.stock) || 0;
+      product.stock = previousStock - quantity;
       await product.save();
+
+      stockChanges.push({
+        productId: product._id,
+        productName: product.name,
+        quantity,
+        previousStock,
+        newStock: product.stock,
+      });
     }
 
     const user = await User.findById(req.user.id).select("name");
@@ -80,6 +91,22 @@ router.post("/create", auth, async (req, res) => {
     });
 
     await newSale.save();
+
+    await StockMovement.insertMany(
+      stockChanges.map((item) => ({
+        ownerAdminId,
+        product: item.productId,
+        productName: item.productName,
+        transactionType: "Sale",
+        quantity: item.quantity,
+        previousStock: item.previousStock,
+        newStock: item.newStock,
+        referenceId: newSale._id,
+        notes: `Sale transaction ${newSale._id}`,
+        recordedBy: req.user.id || null,
+        date: newSale.date,
+      }))
+    );
 
     res.status(200).json(newSale);
   } catch (err) {

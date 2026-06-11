@@ -84,7 +84,7 @@ function Inventory() {
 
   
   const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
-  const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
+  const lowStockCount = products.filter((p) => p.stock <= (p.reorderLevel ?? 10)).length;
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -169,14 +169,14 @@ function Inventory() {
                       <strong>{p.stock}</strong>
                       <div className="stock-bar-bg">
                         <div
-                          className={`stock-bar-fill ${p.stock <= 10 ? "low" : "ok"}`}
+                          className={`stock-bar-fill ${p.stock <= (p.reorderLevel ?? 10) ? "low" : "ok"}`}
                           style={{ width: `${Math.min((p.stock / 100) * 100, 100)}%` }}
                         ></div>
                       </div>
                     </div>
                   </td>
                   <td>
-                    {p.stock > 10 ? (
+                    {p.stock > (p.reorderLevel ?? 10) ? (
                       <span className="status-pill verified">In Stock</span>
                     ) : p.stock > 0 ? (
                       <span className="status-pill warning">Low Stock</span>
