@@ -4,6 +4,33 @@ import { FaClipboardList, FaTimes } from "react-icons/fa";
 import API_BASE_URL from "../config/api";
 import "./Inventory.css";
 
+const getDateInputValue = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const isRecordInDateRange = (record, dateFrom, dateTo) => {
+  const recordDate = record.createdAt ? new Date(record.createdAt) : null;
+
+  if (!recordDate || Number.isNaN(recordDate.getTime())) {
+    return false;
+  }
+
+  if (dateFrom) {
+    const fromDate = new Date(`${dateFrom}T00:00:00`);
+    if (recordDate < fromDate) return false;
+  }
+
+  if (dateTo) {
+    const toDate = new Date(`${dateTo}T23:59:59`);
+    if (recordDate > toDate) return false;
+  }
+
+  return true;
+};
+
 function formatVariance(variance) {
   return variance > 0 ? `+${variance}` : String(variance);
 }
@@ -13,6 +40,12 @@ function InventoryRecords() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
   const [selectedStaff, setSelectedStaff] = useState(null);
+  const [dateFrom, setDateFrom] = useState(() => {
+    const start = new Date();
+    start.setDate(start.getDate() - 29);
+    return getDateInputValue(start);
+  });
+  const [dateTo, setDateTo] = useState(() => getDateInputValue(new Date()));
 
   useEffect(() => {
     fetchAuditLogs();
@@ -49,15 +82,18 @@ function InventoryRecords() {
 
   if (loading) return <div className="loader-container"><div className="spinner"></div></div>;
 
+  const filteredAuditLogs = auditLogs.filter((log) =>
+    isRecordInDateRange(log, dateFrom, dateTo)
+  );
   const selectedStaffLogs = selectedStaff
-    ? auditLogs.filter((log) => {
+    ? filteredAuditLogs.filter((log) => {
         const selectedStaffId = selectedStaff.auditedBy?._id || selectedStaff.auditedBy?.email || selectedStaff.auditedBy?.name;
         const currentStaffId = log.auditedBy?._id || log.auditedBy?.email || log.auditedBy?.name;
         return selectedStaffId && currentStaffId && selectedStaffId === currentStaffId;
       })
     : [];
   const staffSummaries = Object.values(
-    auditLogs.reduce((accumulator, log) => {
+    filteredAuditLogs.reduce((accumulator, log) => {
       const staffKey =
         log.auditedBy?._id || log.auditedBy?.email || log.auditedBy?.name || `unknown-${log._id}`;
 
@@ -87,9 +123,29 @@ function InventoryRecords() {
           <div>
             <h1>Inventory Audit Record </h1>
           </div>
-          <div className="records-summary-badge">
-            <FaClipboardList />
-            <span>{staffSummaries.length} Staff</span>
+          <div className="inventory-header-actions">
+            <div className="inventory-date-range">
+              <label>
+                <span>From</span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(event) => setDateFrom(event.target.value)}
+                />
+              </label>
+              <label>
+                <span>To</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(event) => setDateTo(event.target.value)}
+                />
+              </label>
+            </div>
+            <div className="records-summary-badge">
+              <FaClipboardList />
+              <span>{staffSummaries.length} Staff</span>
+            </div>
           </div>
         </div>
 
