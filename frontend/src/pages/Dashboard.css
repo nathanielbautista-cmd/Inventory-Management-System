@@ -165,6 +165,17 @@
   padding: 24px 12px;
 }
 
+.top-products-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.top-products-chart {
+  height: 320px;
+  padding: 8px 0 0;
+}
+
 .movement-chart-stack {
   display: flex;
   flex-direction: column;
