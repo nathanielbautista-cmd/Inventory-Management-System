@@ -185,6 +185,22 @@ const getTopProductsChartData = (products) => ({
   ],
 });
 
+const getMovementChartData = (products, colors) => ({
+  labels: products.map((product) => product.name),
+  datasets: [
+    {
+      label: "Units Sold",
+      data: products.map((product) => product.units),
+      backgroundColor: colors,
+      borderColor: colors,
+      borderWidth: 1,
+      borderRadius: 8,
+      borderSkipped: false,
+      barThickness: 22,
+    },
+  ],
+});
+
 const topProductsChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -207,6 +223,37 @@ const topProductsChartOptions = {
       callbacks: {
         label: (context) =>
           `${context.label}: ${Number(context.raw || 0).toLocaleString()} units sold`,
+      },
+    },
+  },
+};
+
+const movementChartOptions = {
+  indexAxis: "y",
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (context) => `${Number(context.raw || 0).toLocaleString()} units sold`,
+      },
+    },
+  },
+  scales: {
+    x: {
+      beginAtZero: true,
+      grid: { color: "#eef2f7" },
+      ticks: {
+        color: "#64748b",
+        precision: 0,
+      },
+    },
+    y: {
+      grid: { display: false },
+      ticks: {
+        color: "#334155",
+        font: { weight: "600" },
       },
     },
   },
@@ -306,6 +353,14 @@ function Dashboard() {
   const revenueChart = getRevenueChartData(filteredSales, revenuePeriod);
   const topProducts = normalizeProductMovements(
     productMovements.sort((firstProduct, secondProduct) => secondProduct.units - firstProduct.units)
+  );
+  const fastMovingProducts = normalizeProductMovements(
+    [...productMovements].sort((firstProduct, secondProduct) => secondProduct.units - firstProduct.units)
+  );
+  const slowMovingProducts = normalizeProductMovements(
+    [...productMovements]
+      .filter((product) => product.units > 0)
+      .sort((firstProduct, secondProduct) => firstProduct.units - secondProduct.units)
   );
 
   const chartData = {
@@ -456,7 +511,6 @@ function Dashboard() {
           <div className="section-header">
             <div>
               <h3>Revenue Performance</h3>
-              <p className="panel-subtitle">Sales grouped by the selected period.</p>
             </div>
             <select
               className="chart-filter"
@@ -477,7 +531,6 @@ function Dashboard() {
           <div className="section-header">
             <div>
               <h3>Most Sold Products</h3>
-              <p className="panel-subtitle">Best sellers by units sold.</p>
             </div>
           </div>
           <div className="top-products-panel">
@@ -490,6 +543,56 @@ function Dashboard() {
               </div>
             ) : (
               <div className="dashboard-empty-cell">No product sales found.</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="movement-insights-grid">
+        <div className="chart-section shadow-sm">
+          <div className="section-header">
+            <div>
+              <h3>Fast Moving Products</h3>
+            </div>
+          </div>
+          <div className="movement-chart-height">
+            {fastMovingProducts.length > 0 ? (
+              <Bar
+                data={getMovementChartData(fastMovingProducts, [
+                  "#0f766e",
+                  "#14b8a6",
+                  "#22c55e",
+                  "#65a30d",
+                  "#84cc16",
+                ])}
+                options={movementChartOptions}
+              />
+            ) : (
+              <div className="dashboard-empty-cell">No fast moving products yet.</div>
+            )}
+          </div>
+        </div>
+
+        <div className="chart-section shadow-sm">
+          <div className="section-header">
+            <div>
+              <h3>Slow Moving Products</h3>
+            </div>
+          </div>
+          <div className="movement-chart-height">
+            {slowMovingProducts.length > 0 ? (
+              <Bar
+                data={getMovementChartData(slowMovingProducts, [
+                  "#475569",
+                  "#64748b",
+                  "#94a3b8",
+                  "#a8a29e",
+                  "#78716c",
+                ])}
+                options={movementChartOptions}
+              />
+            ) : (
+              <div className="dashboard-empty-cell">No slow moving products yet.</div>
             )}
           </div>
         </div>

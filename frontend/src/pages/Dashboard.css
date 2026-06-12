@@ -111,6 +111,14 @@
   grid-template-columns: minmax(0, 1.7fr) minmax(360px, 1fr);
   gap: 25px;
   align-items: start;
+  margin-bottom: 25px;
+}
+
+.movement-insights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 25px;
+  align-items: start;
 }
 
 .chart-section, .recent-sales-section {
@@ -224,7 +232,8 @@
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 @media (max-width: 960px) {
-  .dashboard-main-content {
+  .dashboard-main-content,
+  .movement-insights-grid {
     grid-template-columns: 1fr;
   }
 }
