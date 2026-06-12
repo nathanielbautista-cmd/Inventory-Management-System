@@ -17,10 +17,6 @@ const productSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
-  barcode: {
-    type: String,
-    default: "",
-  },
   initialPrice: {
     type: Number,
     required: true,

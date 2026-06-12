@@ -17,8 +17,9 @@
 .dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 30px;
+  gap: 20px;
 }
 
 .dashboard-header h1 { font-size: 1.8rem; font-weight: 800; color: var(--text-dark); margin: 0; }
@@ -30,6 +31,38 @@
   border-radius: 20px;
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.dashboard-filter-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-filter-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--text-light);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.dashboard-filter-bar input,
+.dashboard-filter-bar select {
+  min-width: 150px;
+  border: 1px solid #dbe3ef;
+  background: white;
+  color: var(--text-dark);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  outline: none;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
 }
 
 
@@ -75,7 +108,7 @@
 
 .dashboard-main-content {
   display: grid;
-  grid-template-columns: 2fr 1.2fr;
+  grid-template-columns: minmax(0, 1.7fr) minmax(360px, 1fr);
   gap: 25px;
   align-items: start;
 }
@@ -132,46 +165,44 @@
   padding: 24px 12px;
 }
 
-.top-products-panel {
+.movement-chart-stack {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.top-products-highlight {
-  padding: 18px 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #eef2ff 0%, #dbeafe 100%);
-  border: 1px solid #c7d2fe;
-}
-
-.top-products-highlight-label {
-  display: inline-block;
-  margin-bottom: 8px;
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--primary);
-}
-
-.top-products-highlight strong {
-  display: block;
-  color: var(--text-dark);
-  font-size: 1.15rem;
-}
-
-.top-products-highlight p {
-  margin: 6px 0 0;
-  color: #475569;
-}
-
-.top-products-chart {
-  height: 320px;
-  padding: 8px 0 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+.movement-chart-card {
   border: 1px solid #eef2f7;
-  border-radius: 18px;
+  border-radius: 14px;
+  background: #fbfdff;
+  padding: 16px;
+}
+
+.movement-chart-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--text-dark);
+}
+
+.movement-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.fast-dot {
+  background: #0f766e;
+}
+
+.slow-dot {
+  background: #64748b;
+}
+
+.movement-chart-height {
+  height: 220px;
 }
 
 .text-danger { color: var(--danger); }
@@ -188,6 +219,17 @@
 }
 
 @media (max-width: 640px) {
+  .dashboard-header {
+    flex-direction: column;
+  }
+
+  .dashboard-filter-bar,
+  .dashboard-filter-bar label,
+  .dashboard-filter-bar input,
+  .dashboard-filter-bar select {
+    width: 100%;
+  }
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
@@ -203,5 +245,9 @@
 
   .top-products-chart {
     height: 280px;
+  }
+
+  .movement-chart-height {
+    height: 240px;
   }
 }

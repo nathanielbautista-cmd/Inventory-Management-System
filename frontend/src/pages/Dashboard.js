@@ -6,16 +6,12 @@ import "./Dashboard.css";
 import {
   Chart as ChartJS,
   BarElement,
-  ArcElement,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
   Tooltip,
   Legend,
-  Filler,
 } from "chart.js";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   FaBoxes,
   FaMoneyBillWave,
@@ -26,14 +22,10 @@ import {
 
 ChartJS.register(
   BarElement,
-  ArcElement,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
   Tooltip,
-  Legend,
-  Filler
+  Legend
 );
 
 const getSaleItems = (sale) => {
@@ -44,34 +36,58 @@ const getSaleItems = (sale) => {
   return [
     {
       productName: sale.productName || "Deleted Product",
+      category: sale.category || "Uncategorized",
       quantity: sale.quantity || 0,
     },
   ];
 };
 
-const getRangeDays = (range) => (range === "30" ? 30 : 7);
-
-const formatLocalDateKey = (date) => {
+const getDateInputValue = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
-const getRevenueChartData = (sales, range) => {
-  const dayCount = getRangeDays(range);
-  const now = new Date();
-  const startDate = new Date(now);
-  startDate.setHours(0, 0, 0, 0);
-  startDate.setDate(startDate.getDate() - (dayCount - 1));
+const isSaleInDateRange = (sale, dateFrom, dateTo) => {
+  const saleDate = sale.date ? new Date(sale.date) : null;
 
-  const revenueByDay = new Map();
-
-  for (let index = 0; index < dayCount; index += 1) {
-    const currentDay = new Date(startDate);
-    currentDay.setDate(startDate.getDate() + index);
-    revenueByDay.set(formatLocalDateKey(currentDay), 0);
+  if (!saleDate || Number.isNaN(saleDate.getTime())) {
+    return false;
   }
+
+  if (dateFrom) {
+    const fromDate = new Date(`${dateFrom}T00:00:00`);
+    if (saleDate < fromDate) return false;
+  }
+
+  if (dateTo) {
+    const toDate = new Date(`${dateTo}T23:59:59`);
+    if (saleDate > toDate) return false;
+  }
+
+  return true;
+};
+
+const saleHasCategory = (sale, category) =>
+  category === "All" ||
+  getSaleItems(sale).some((item) => (item.category || "Uncategorized") === category);
+
+const getRevenueChartData = (sales) => {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+
+  const weekStart = new Date(todayStart);
+  weekStart.setDate(weekStart.getDate() - 6);
+
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const revenueTotals = {
+    daily: 0,
+    weekly: 0,
+    monthly: 0,
+  };
 
   sales.forEach((sale) => {
     const saleDate = sale.date ? new Date(sale.date) : null;
@@ -80,34 +96,101 @@ const getRevenueChartData = (sales, range) => {
       return;
     }
 
-    const saleDay = new Date(saleDate);
-    saleDay.setHours(0, 0, 0, 0);
-
-    if (saleDay < startDate) {
-      return;
-    }
-
-    const dateKey = formatLocalDateKey(saleDay);
     const saleTotal = Number(sale.total ?? sale.price) || 0;
 
-    if (revenueByDay.has(dateKey)) {
-      revenueByDay.set(dateKey, revenueByDay.get(dateKey) + saleTotal);
+    if (saleDate >= todayStart) {
+      revenueTotals.daily += saleTotal;
+    }
+
+    if (saleDate >= weekStart) {
+      revenueTotals.weekly += saleTotal;
+    }
+
+    if (saleDate >= monthStart) {
+      revenueTotals.monthly += saleTotal;
     }
   });
 
-  const labels = [];
-  const values = [];
+  return {
+    labels: ["Daily", "Weekly", "Monthly"],
+    values: [revenueTotals.daily, revenueTotals.weekly, revenueTotals.monthly],
+  };
+};
 
-  revenueByDay.forEach((value, dateKey) => {
-    const [year, month, day] = dateKey.split("-").map(Number);
-    const date = new Date(year, month - 1, day);
-    labels.push(
-      date.toLocaleDateString("en-US", dayCount === 7 ? { weekday: "short" } : { month: "short", day: "numeric" })
-    );
-    values.push(value);
-  });
+const normalizeProductMovements = (products) =>
+  (Array.isArray(products) ? products : [])
+    .map((product) => ({
+      name: product.name || "Deleted Product",
+      units: Number(product.units ?? product.quantity) || 0,
+    }))
+    .filter((product) => product.units >= 0)
+    .slice(0, 5);
 
-  return { labels, values };
+const getProductMovements = (sales) =>
+  Object.values(
+    sales.reduce((accumulator, sale) => {
+      getSaleItems(sale).forEach((item) => {
+        const key = item.productName || "Deleted Product";
+
+        if (!accumulator[key]) {
+          accumulator[key] = {
+            name: key,
+            units: 0,
+          };
+        }
+
+        accumulator[key].units += Number(item.quantity) || 0;
+      });
+
+      return accumulator;
+    }, {})
+  );
+
+const getMovementChartData = (products, colors) => ({
+  labels: products.map((product) => product.name),
+  datasets: [
+    {
+      label: "Units Sold",
+      data: products.map((product) => product.units),
+      backgroundColor: colors,
+      borderColor: colors,
+      borderWidth: 1,
+      borderRadius: 8,
+      borderSkipped: false,
+      barThickness: 22,
+    },
+  ],
+});
+
+const movementChartOptions = {
+  indexAxis: "y",
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (context) => `${Number(context.raw || 0).toLocaleString()} units sold`,
+      },
+    },
+  },
+  scales: {
+    x: {
+      beginAtZero: true,
+      grid: { color: "#eef2f7" },
+      ticks: {
+        color: "#64748b",
+        precision: 0,
+      },
+    },
+    y: {
+      grid: { display: false },
+      ticks: {
+        color: "#334155",
+        font: { weight: "600" },
+      },
+    },
+  },
 };
 
 function Dashboard() {
@@ -122,9 +205,14 @@ function Dashboard() {
     slowMovingProducts: [],
   });
 
-  const [topProducts, setTopProducts] = useState([]);
   const [sales, setSales] = useState([]);
-  const [revenueRange, setRevenueRange] = useState("7");
+  const [dateFrom, setDateFrom] = useState(() => {
+    const start = new Date();
+    start.setDate(start.getDate() - 6);
+    return getDateInputValue(start);
+  });
+  const [dateTo, setDateTo] = useState(() => getDateInputValue(new Date()));
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [fetchError, setFetchError] = useState("");
 
   useEffect(() => {
@@ -170,28 +258,6 @@ function Dashboard() {
       const salesData = Array.isArray(res.data) ? res.data : [];
       setSales(salesData);
 
-      const groupedProducts = Object.values(
-        salesData.reduce((accumulator, sale) => {
-          getSaleItems(sale).forEach((item) => {
-            const key = item.productName || "Deleted Product";
-
-            if (!accumulator[key]) {
-              accumulator[key] = {
-                name: key,
-                units: 0,
-              };
-            }
-
-            accumulator[key].units += Number(item.quantity) || 0;
-          });
-
-          return accumulator;
-        }, {})
-      )
-        .sort((firstProduct, secondProduct) => secondProduct.units - firstProduct.units)
-        .slice(0, 5);
-
-      setTopProducts(groupedProducts);
       setFetchError("");
     } catch (err) {
       console.error(err);
@@ -201,7 +267,31 @@ function Dashboard() {
     }
   };
 
-  const revenueChart = getRevenueChartData(sales, revenueRange);
+  const categoryOptions = [
+    "All",
+    ...Array.from(
+      new Set(
+        sales
+          .flatMap((sale) => getSaleItems(sale))
+          .map((item) => item.category || "Uncategorized")
+      )
+    ).sort(),
+  ];
+  const filteredSales = sales.filter(
+    (sale) =>
+      isSaleInDateRange(sale, dateFrom, dateTo) &&
+      saleHasCategory(sale, selectedCategory)
+  );
+  const productMovements = getProductMovements(filteredSales);
+  const revenueChart = getRevenueChartData(filteredSales);
+  const fastMovingProducts = normalizeProductMovements(
+    productMovements.sort((firstProduct, secondProduct) => secondProduct.units - firstProduct.units)
+  );
+  const slowMovingProducts = normalizeProductMovements(
+    productMovements
+      .filter((product) => product.units > 0)
+      .sort((firstProduct, secondProduct) => firstProduct.units - secondProduct.units)
+  );
 
   const chartData = {
     labels: revenueChart.labels,
@@ -209,11 +299,11 @@ function Dashboard() {
       {
         label: "Revenue (PHP)",
         data: revenueChart.values,
-        backgroundColor: "rgba(79, 70, 229, 0.8)",
-        borderColor: "#4f46e5",
+        backgroundColor: ["#2563eb", "#0f766e", "#d97706"],
+        borderColor: ["#1d4ed8", "#0f766e", "#b45309"],
         borderWidth: 2,
-        borderRadius: 8,
-        hoverBackgroundColor: "#4f46e5",
+        borderRadius: 10,
+        hoverBackgroundColor: ["#1d4ed8", "#0f766e", "#b45309"],
       },
     ],
   };
@@ -240,51 +330,9 @@ function Dashboard() {
       },
       x: {
         grid: { display: false },
-        ticks: { color: "#64748b" },
-      },
-    },
-  };
-
-  const topProductsChartData = {
-    labels: topProducts.map((product) => product.name),
-    datasets: [
-      {
-        label: "Units Sold",
-        data: topProducts.map((product) => product.units),
-        backgroundColor: [
-          "#2563eb",
-          "#0f766e",
-          "#d97706",
-          "#7c3aed",
-          "#dc2626",
-        ],
-        borderRadius: 10,
-        borderSkipped: false,
-      },
-    ],
-  };
-
-  const topProductsChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          usePointStyle: true,
-          pointStyle: "circle",
-          boxWidth: 10,
-          padding: 18,
-          color: "#475569",
-          font: {
-            size: 12,
-            weight: "600",
-          },
-        },
-      },
-      tooltip: {
-        callbacks: {
-          label: (context) => `${context.label}: ${context.raw} pcs`,
+        ticks: {
+          color: "#334155",
+          font: { weight: "700" },
         },
       },
     },
@@ -296,7 +344,37 @@ function Dashboard() {
         <div>
           <h1>Dashboard</h1>
         </div>
-        <div className="date-pill">{new Date().toDateString()}</div>
+        <div className="dashboard-filter-bar">
+          <label>
+            <span>From</span>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(event) => setDateFrom(event.target.value)}
+            />
+          </label>
+          <label>
+            <span>To</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(event) => setDateTo(event.target.value)}
+            />
+          </label>
+          <label>
+            <span>Category</span>
+            <select
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+            >
+              {categoryOptions.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </header>
 
       {fetchError && <p style={{ color: "#b91c1c", marginBottom: "12px" }}>{fetchError}</p>}
@@ -356,42 +434,15 @@ function Dashboard() {
             <p className="stat-value">{stats.totalSuppliers || 0}</p>
           </div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-icon fast">
-            <FaChartLine />
-          </div>
-          <div className="stat-info">
-            <h3>Fast Moving</h3>
-            <p className="stat-value">{stats.fastMovingProducts?.[0]?.name || "None"}</p>
-            <span className="growth-indicator">{stats.fastMovingProducts?.[0]?.units || 0} units</span>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon slow">
-            <FaBoxes />
-          </div>
-          <div className="stat-info">
-            <h3>Slow Moving</h3>
-            <p className="stat-value">{stats.slowMovingProducts?.[0]?.name || "None"}</p>
-            <span className="growth-indicator">{stats.slowMovingProducts?.[0]?.units || 0} units</span>
-          </div>
-        </div>
       </div>
 
       <div className="dashboard-main-content">
         <div className="chart-section shadow-sm">
           <div className="section-header">
-            <h3>Revenue Performance</h3>
-            <select
-              className="chart-filter"
-              value={revenueRange}
-              onChange={(event) => setRevenueRange(event.target.value)}
-            >
-              <option value="7">Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-            </select>
+            <div>
+              <h3>Revenue Performance</h3>
+              <p className="panel-subtitle">Daily, weekly, and monthly sales at a glance.</p>
+            </div>
           </div>
           <div className="chart-height">
             <Bar data={chartData} options={chartOptions} />
@@ -401,21 +452,56 @@ function Dashboard() {
         <div className="recent-sales-section shadow-sm">
           <div className="section-header">
             <div>
-              <h3>Most Sold Products</h3>
+              <h3>Product Movement</h3>
+              <p className="panel-subtitle">Top and low-moving items by units sold.</p>
             </div>
           </div>
-          <div className="top-products-panel">
-            {topProducts.length > 0 ? (
-              <>
-                <div className="top-products-chart">
-                  <Pie data={topProductsChartData} options={topProductsChartOptions} />
-                </div>
-              </>
-            ) : (
-              <div className="dashboard-empty-cell">
-                No sales data found.
+          <div className="movement-chart-stack">
+            <div className="movement-chart-card">
+              <div className="movement-chart-title">
+                <span className="movement-dot fast-dot"></span>
+                <strong>Fast Moving Products</strong>
               </div>
-            )}
+              <div className="movement-chart-height">
+                {fastMovingProducts.length > 0 ? (
+                  <Bar
+                    data={getMovementChartData(fastMovingProducts, [
+                      "#0f766e",
+                      "#14b8a6",
+                      "#22c55e",
+                      "#65a30d",
+                      "#84cc16",
+                    ])}
+                    options={movementChartOptions}
+                  />
+                ) : (
+                  <div className="dashboard-empty-cell">No fast moving products yet.</div>
+                )}
+              </div>
+            </div>
+
+            <div className="movement-chart-card">
+              <div className="movement-chart-title">
+                <span className="movement-dot slow-dot"></span>
+                <strong>Slow Moving Products</strong>
+              </div>
+              <div className="movement-chart-height">
+                {slowMovingProducts.length > 0 ? (
+                  <Bar
+                    data={getMovementChartData(slowMovingProducts, [
+                      "#475569",
+                      "#64748b",
+                      "#94a3b8",
+                      "#a8a29e",
+                      "#78716c",
+                    ])}
+                    options={movementChartOptions}
+                  />
+                ) : (
+                  <div className="dashboard-empty-cell">No slow moving products yet.</div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

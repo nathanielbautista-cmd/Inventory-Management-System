@@ -18,6 +18,23 @@ function POS() {
   const token = localStorage.getItem("token");
   const categories = ["All", ...new Set(products.map((product) => product.category))];
 
+  const formatReceiptDate = (value) => {
+    const date = value ? new Date(value) : new Date();
+    return date.toLocaleDateString("en-PH", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const formatReceiptTime = (value) => {
+    const date = value ? new Date(value) : new Date();
+    return date.toLocaleTimeString("en-PH", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
+
   const fetchProducts = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/products`, {
@@ -129,7 +146,8 @@ function POS() {
         transactionId: res.data?._id,
         items: [...cart],
         total: subtotal,
-        date: new Date(),
+        date: res.data?.date || new Date(),
+        cashier: res.data?.soldByName || localStorage.getItem("userName") || "Unknown Staff",
         method: paymentMethod,
       });
       setShowReceipt(true);
@@ -373,6 +391,9 @@ function POS() {
             <div className="receipt-modal">
               <h2>Transaction Successful</h2>
               <p>Transaction ID: {lastTransaction?.transactionId || "Pending"}</p>
+              <p>Cashier: {lastTransaction?.cashier || "Unknown Staff"}</p>
+              <p>Date: {formatReceiptDate(lastTransaction?.date)}</p>
+              <p>Time: {formatReceiptTime(lastTransaction?.date)}</p>
               <p>Paid via {lastTransaction?.method}</p>
               <div className="receipt-details">
                 {lastTransaction?.items.map((item) => (

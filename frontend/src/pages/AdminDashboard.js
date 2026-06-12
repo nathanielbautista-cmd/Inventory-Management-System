@@ -8,7 +8,6 @@ import InventoryRecords from "./InventoryRecords";
 import StockMovements from "./StockMovements";
 import Sales from "./Sales";
 import SupplierManagement from "./SupplierManagement";
-import Reports from "./Reports";
 import ProfileModal from "../components/ProfileModal";
 import { clearCurrentUserSession } from "../utils/session";
 
@@ -44,8 +43,6 @@ function AdminDashboard() {
         return <Sales />;
       case "suppliers":
         return <SupplierManagement />;
-      case "reports":
-        return <Reports />;
       case "users":
         return <ManageUsers />;
       default:
@@ -131,12 +128,6 @@ function AdminDashboard() {
               onClick={() => setActivePage("suppliers")}
             >
               Suppliers
-            </li>
-            <li
-              className={activePage === "reports" ? "active" : ""}
-              onClick={() => setActivePage("reports")}
-            >
-              Reports
             </li>
           </ul>
         </div>

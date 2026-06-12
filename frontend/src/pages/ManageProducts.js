@@ -25,7 +25,6 @@ function ManageProducts() {
     description: "",
     initialPrice: "",
     price: "",
-    barcode: "",
     stock: "",
     reorderLevel: "10",
     image: "",
@@ -160,7 +159,6 @@ function ManageProducts() {
       description: product.description || "",
       initialPrice: product.initialPrice ?? "",
       price: product.price ?? "",
-      barcode: product.barcode || "",
       stock: product.stock ?? "",
       reorderLevel: product.reorderLevel ?? 10,
       image: product.image || "",
@@ -193,7 +191,6 @@ function ManageProducts() {
       description: "",
       initialPrice: "",
       price: "",
-      barcode: "",
       stock: "",
       reorderLevel: "10",
       image: "",
@@ -204,8 +201,7 @@ function ManageProducts() {
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.brand || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.barcode || "").toLowerCase().includes(searchTerm.toLowerCase())
+    (p.brand || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -256,7 +252,7 @@ function ManageProducts() {
             <tr>
               <th>Item Details</th>
               <th>Category</th>
-              <th>Brand / Barcode</th>
+              <th>Brand</th>
               <th>Pricing (Capital - Sale)</th>
               <th>Stock</th>
               <th>Status</th>
@@ -280,7 +276,6 @@ function ManageProducts() {
                 <td>
                   <div className="product-meta-stack">
                     <strong>{p.brand || "No brand"}</strong>
-                    <span>{p.barcode || "No barcode"}</span>
                   </div>
                 </td>
                 <td>
@@ -353,10 +348,6 @@ function ManageProducts() {
                   <label>Reorder Level</label>
                   <input type="number" name="reorderLevel" value={formData.reorderLevel} onChange={handleChange} required />
                 </div>
-              </div>
-              <div className="input-group">
-                <label>Barcode</label>
-                <input type="text" name="barcode" value={formData.barcode} onChange={handleChange} />
               </div>
               <div className="input-group">
                 <label>Product Image</label>
