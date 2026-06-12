@@ -6,13 +6,12 @@ import "./Dashboard.css";
 import {
   Chart as ChartJS,
   BarElement,
-  ArcElement,
   CategoryScale,
   LinearScale,
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   FaBoxes,
   FaMoneyBillWave,
@@ -23,73 +22,27 @@ import {
 
 ChartJS.register(
   BarElement,
-  ArcElement,
   CategoryScale,
   LinearScale,
   Tooltip,
   Legend
 );
 
-const getSaleItems = (sale) => {
-  if (Array.isArray(sale.items) && sale.items.length > 0) {
-    return sale.items;
-  }
+const getRevenueChartData = (sales) => {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
 
-  return [
-    {
-      productName: sale.productName || "Deleted Product",
-      category: sale.category || "Uncategorized",
-      quantity: sale.quantity || 0,
-    },
-  ];
-};
+  const weekStart = new Date(todayStart);
+  weekStart.setDate(weekStart.getDate() - 6);
 
-const getDateInputValue = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-const isSaleInDateRange = (sale, dateFrom, dateTo) => {
-  const saleDate = sale.date ? new Date(sale.date) : null;
-
-  if (!saleDate || Number.isNaN(saleDate.getTime())) {
-    return false;
-  }
-
-  if (dateFrom) {
-    const fromDate = new Date(`${dateFrom}T00:00:00`);
-    if (saleDate < fromDate) return false;
-  }
-
-  if (dateTo) {
-    const toDate = new Date(`${dateTo}T23:59:59`);
-    if (saleDate > toDate) return false;
-  }
-
-  return true;
-};
-
-const saleHasCategory = (sale, category) =>
-  category === "All" ||
-  getSaleItems(sale).some((item) => (item.category || "Uncategorized") === category);
-
-const formatShortDate = (date) =>
-  date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-
-const formatMonthLabel = (date) =>
-  date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-
-const getWeekStart = (date) => {
-  const weekStart = new Date(date);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  return weekStart;
-};
-
-const getRevenueChartData = (sales, period) => {
-  const revenueByPeriod = new Map();
+  const revenueTotals = {
+    daily: 0,
+    weekly: 0,
+    monthly: 0,
+  };
 
   sales.forEach((sale) => {
     const saleDate = sale.date ? new Date(sale.date) : null;
@@ -99,47 +52,24 @@ const getRevenueChartData = (sales, period) => {
     }
 
     const saleTotal = Number(sale.total ?? sale.price) || 0;
-    let key = "";
-    let label = "";
-    let sortDate = new Date(saleDate);
 
-    if (period === "monthly") {
-      sortDate = new Date(saleDate.getFullYear(), saleDate.getMonth(), 1);
-      key = `${sortDate.getFullYear()}-${String(sortDate.getMonth() + 1).padStart(2, "0")}`;
-      label = formatMonthLabel(sortDate);
-    } else if (period === "weekly") {
-      sortDate = getWeekStart(saleDate);
-      const weekEnd = new Date(sortDate);
-      weekEnd.setDate(sortDate.getDate() + 6);
-      key = getDateInputValue(sortDate);
-      label = `${formatShortDate(sortDate)} - ${formatShortDate(weekEnd)}`;
-    } else {
-      sortDate.setHours(0, 0, 0, 0);
-      key = getDateInputValue(sortDate);
-      label = formatShortDate(sortDate);
+    if (saleDate >= todayStart) {
+      revenueTotals.daily += saleTotal;
     }
 
-    if (!revenueByPeriod.has(key)) {
-      revenueByPeriod.set(key, {
-        label,
-        sortValue: sortDate.getTime(),
-        total: 0,
-      });
+    if (saleDate >= weekStart) {
+      revenueTotals.weekly += saleTotal;
     }
 
-    revenueByPeriod.get(key).total += saleTotal;
+    if (saleDate >= monthStart) {
+      revenueTotals.monthly += saleTotal;
+    }
   });
 
-  const rows = Array.from(revenueByPeriod.values()).sort(
-    (firstRow, secondRow) => firstRow.sortValue - secondRow.sortValue
-  );
-
-  return rows.length > 0
-    ? {
-        labels: rows.map((row) => row.label),
-        values: rows.map((row) => row.total),
-      }
-    : { labels: ["No sales"], values: [0] };
+  return {
+    labels: ["Daily", "Weekly", "Monthly"],
+    values: [revenueTotals.daily, revenueTotals.weekly, revenueTotals.monthly],
+  };
 };
 
 const normalizeProductMovements = (products) =>
@@ -150,40 +80,6 @@ const normalizeProductMovements = (products) =>
     }))
     .filter((product) => product.units >= 0)
     .slice(0, 5);
-
-const getProductMovements = (sales) =>
-  Object.values(
-    sales.reduce((accumulator, sale) => {
-      getSaleItems(sale).forEach((item) => {
-        const key = item.productName || "Deleted Product";
-
-        if (!accumulator[key]) {
-          accumulator[key] = {
-            name: key,
-            units: 0,
-          };
-        }
-
-        accumulator[key].units += Number(item.quantity) || 0;
-      });
-
-      return accumulator;
-    }, {})
-  );
-
-const getTopProductsChartData = (products) => ({
-  labels: products.map((product) => product.name),
-  datasets: [
-    {
-      label: "Units Sold",
-      data: products.map((product) => product.units),
-      backgroundColor: ["#2563eb", "#0f766e", "#d97706", "#7c3aed", "#dc2626"],
-      borderColor: "#ffffff",
-      borderWidth: 3,
-      hoverOffset: 8,
-    },
-  ],
-});
 
 const getMovementChartData = (products, colors) => ({
   labels: products.map((product) => product.name),
@@ -200,33 +96,6 @@ const getMovementChartData = (products, colors) => ({
     },
   ],
 });
-
-const topProductsChartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: "bottom",
-      labels: {
-        usePointStyle: true,
-        pointStyle: "circle",
-        boxWidth: 10,
-        padding: 16,
-        color: "#475569",
-        font: {
-          size: 12,
-          weight: "600",
-        },
-      },
-    },
-    tooltip: {
-      callbacks: {
-        label: (context) =>
-          `${context.label}: ${Number(context.raw || 0).toLocaleString()} units sold`,
-      },
-    },
-  },
-};
 
 const movementChartOptions = {
   indexAxis: "y",
@@ -272,14 +141,6 @@ function Dashboard() {
   });
 
   const [sales, setSales] = useState([]);
-  const [dateFrom, setDateFrom] = useState(() => {
-    const start = new Date();
-    start.setDate(start.getDate() - 6);
-    return getDateInputValue(start);
-  });
-  const [dateTo, setDateTo] = useState(() => getDateInputValue(new Date()));
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [revenuePeriod, setRevenuePeriod] = useState("daily");
   const [fetchError, setFetchError] = useState("");
 
   useEffect(() => {
@@ -334,34 +195,9 @@ function Dashboard() {
     }
   };
 
-  const categoryOptions = [
-    "All",
-    ...Array.from(
-      new Set(
-        sales
-          .flatMap((sale) => getSaleItems(sale))
-          .map((item) => item.category || "Uncategorized")
-      )
-    ).sort(),
-  ];
-  const filteredSales = sales.filter(
-    (sale) =>
-      isSaleInDateRange(sale, dateFrom, dateTo) &&
-      saleHasCategory(sale, selectedCategory)
-  );
-  const productMovements = getProductMovements(filteredSales);
-  const revenueChart = getRevenueChartData(filteredSales, revenuePeriod);
-  const topProducts = normalizeProductMovements(
-    productMovements.sort((firstProduct, secondProduct) => secondProduct.units - firstProduct.units)
-  );
-  const fastMovingProducts = normalizeProductMovements(
-    [...productMovements].sort((firstProduct, secondProduct) => secondProduct.units - firstProduct.units)
-  );
-  const slowMovingProducts = normalizeProductMovements(
-    [...productMovements]
-      .filter((product) => product.units > 0)
-      .sort((firstProduct, secondProduct) => firstProduct.units - secondProduct.units)
-  );
+  const revenueChart = getRevenueChartData(sales);
+  const fastMovingProducts = normalizeProductMovements(stats.fastMovingProducts);
+  const slowMovingProducts = normalizeProductMovements(stats.slowMovingProducts);
 
   const chartData = {
     labels: revenueChart.labels,
@@ -414,37 +250,7 @@ function Dashboard() {
         <div>
           <h1>Dashboard</h1>
         </div>
-        <div className="dashboard-filter-bar">
-          <label>
-            <span>From</span>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(event) => setDateFrom(event.target.value)}
-            />
-          </label>
-          <label>
-            <span>To</span>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(event) => setDateTo(event.target.value)}
-            />
-          </label>
-          <label>
-            <span>Category</span>
-            <select
-              value={selectedCategory}
-              onChange={(event) => setSelectedCategory(event.target.value)}
-            >
-              {categoryOptions.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <div className="date-pill">{new Date().toDateString()}</div>
       </header>
 
       {fetchError && <p style={{ color: "#b91c1c", marginBottom: "12px" }}>{fetchError}</p>}
@@ -511,16 +317,8 @@ function Dashboard() {
           <div className="section-header">
             <div>
               <h3>Revenue Performance</h3>
+              <p className="panel-subtitle">Daily, weekly, and monthly sales.</p>
             </div>
-            <select
-              className="chart-filter"
-              value={revenuePeriod}
-              onChange={(event) => setRevenuePeriod(event.target.value)}
-            >
-              <option value="daily">Daily Sales</option>
-              <option value="weekly">Weekly Sales</option>
-              <option value="monthly">Monthly Sales</option>
-            </select>
           </div>
           <div className="chart-height">
             <Bar data={chartData} options={chartOptions} />
@@ -530,70 +328,56 @@ function Dashboard() {
         <div className="recent-sales-section shadow-sm">
           <div className="section-header">
             <div>
-              <h3>Most Sold Products</h3>
+              <h3>Product Movement</h3>
+          
             </div>
           </div>
-          <div className="top-products-panel">
-            {topProducts.length > 0 ? (
-              <div className="top-products-chart">
-                <Pie
-                  data={getTopProductsChartData(topProducts)}
-                  options={topProductsChartOptions}
-                />
+          <div className="movement-chart-stack">
+            <div className="movement-chart-card">
+              <div className="movement-chart-title">
+                <span className="movement-dot fast-dot"></span>
+                <strong>Fast Moving Products</strong>
               </div>
-            ) : (
-              <div className="dashboard-empty-cell">No product sales found.</div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="movement-insights-grid">
-        <div className="chart-section shadow-sm">
-          <div className="section-header">
-            <div>
-              <h3>Fast Moving Products</h3>
+              <div className="movement-chart-height">
+                {fastMovingProducts.length > 0 ? (
+                  <Bar
+                    data={getMovementChartData(fastMovingProducts, [
+                      "#0f766e",
+                      "#14b8a6",
+                      "#22c55e",
+                      "#65a30d",
+                      "#84cc16",
+                    ])}
+                    options={movementChartOptions}
+                  />
+                ) : (
+                  <div className="dashboard-empty-cell">No fast moving products yet.</div>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="movement-chart-height">
-            {fastMovingProducts.length > 0 ? (
-              <Bar
-                data={getMovementChartData(fastMovingProducts, [
-                  "#0f766e",
-                  "#14b8a6",
-                  "#22c55e",
-                  "#65a30d",
-                  "#84cc16",
-                ])}
-                options={movementChartOptions}
-              />
-            ) : (
-              <div className="dashboard-empty-cell">No fast moving products yet.</div>
-            )}
-          </div>
-        </div>
 
-        <div className="chart-section shadow-sm">
-          <div className="section-header">
-            <div>
-              <h3>Slow Moving Products</h3>
+            <div className="movement-chart-card">
+              <div className="movement-chart-title">
+                <span className="movement-dot slow-dot"></span>
+                <strong>Slow Moving Products</strong>
+              </div>
+              <div className="movement-chart-height">
+                {slowMovingProducts.length > 0 ? (
+                  <Bar
+                    data={getMovementChartData(slowMovingProducts, [
+                      "#475569",
+                      "#64748b",
+                      "#94a3b8",
+                      "#a8a29e",
+                      "#78716c",
+                    ])}
+                    options={movementChartOptions}
+                  />
+                ) : (
+                  <div className="dashboard-empty-cell">No slow moving products yet.</div>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="movement-chart-height">
-            {slowMovingProducts.length > 0 ? (
-              <Bar
-                data={getMovementChartData(slowMovingProducts, [
-                  "#475569",
-                  "#64748b",
-                  "#94a3b8",
-                  "#a8a29e",
-                  "#78716c",
-                ])}
-                options={movementChartOptions}
-              />
-            ) : (
-              <div className="dashboard-empty-cell">No slow moving products yet.</div>
-            )}
           </div>
         </div>
       </div>
